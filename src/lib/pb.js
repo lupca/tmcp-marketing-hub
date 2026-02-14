@@ -1,5 +1,5 @@
 // PocketBase REST API Client
-const PB_URL = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090';
+const PB_URL = import.meta.env.VITE_POCKETBASE_URL || '/pb';
 
 let authToken = localStorage.getItem('pb_token') || null;
 let userId = localStorage.getItem('pb_user_id') || null;

@@ -1,5 +1,5 @@
 // Chat API client for Agents SSE streaming
-const AGENTS_URL = import.meta.env.VITE_AGENTS_API_URL || 'http://0.0.0.0:8000';
+const AGENTS_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
 
 /**
  * Send a message to the marketing agents and stream SSE events.

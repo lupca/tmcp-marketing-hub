@@ -3,18 +3,57 @@ import { list, create, update, remove, getUserId } from '../lib/pb';
 import { useToast } from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { Plus, Search, Edit2, Trash2, Layout, Users as UsersIcon } from 'lucide-react';
+import WorksheetAIModal from '../components/WorksheetAIModal';
+import { Plus, Search, Edit2, Trash2, Layout, Users as UsersIcon, Sparkles, Eye, Pencil } from 'lucide-react';
 
-const empty = { title: '', content: '{}' };
+/* ---- Lightweight Markdown renderer ---- */
+function renderMarkdown(md) {
+    if (!md || typeof md !== 'string') return '';
+    let html = md
+        // Escape HTML
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        // Headers
+        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        // Bold & Italic
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Unordered lists
+        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
+        // Horizontal rule
+        .replace(/^---$/gm, '<hr/>')
+        // Line breaks (double newline = paragraph, single = <br>)
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br/>');
+    // Wrap <li> groups in <ul>
+    html = html.replace(/((?:<li>.*?<\/li><br\/>?)+)/g, '<ul>$1</ul>');
+    html = html.replace(/<ul>(.*?)<\/ul>/gs, (_, inner) => '<ul>' + inner.replace(/<br\/>/g, '') + '</ul>');
+    return '<p>' + html + '</p>';
+}
+
+/* ---- Content display: handle both old JSON and new string content ---- */
+function getContentString(content) {
+    if (!content) return '';
+    if (typeof content === 'string') return content;
+    if (typeof content === 'object') return JSON.stringify(content, null, 2);
+    return String(content);
+}
+
+const empty = { title: '', content: '' };
 
 export default function WorksheetsPage() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [modal, setModal] = useState(null);
+    const [modal, setModal] = useState(null); // 'create' | 'edit' | null
+    const [aiModal, setAiModal] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [form, setForm] = useState({ ...empty });
     const [editId, setEditId] = useState(null);
+    const [previewMode, setPreviewMode] = useState(false);
     const toast = useToast();
 
     const load = async () => {
@@ -29,22 +68,22 @@ export default function WorksheetsPage() {
 
     const filtered = items.filter(i => i.title?.toLowerCase().includes(search.toLowerCase()));
 
-    const openCreate = () => { setForm({ ...empty }); setEditId(null); setModal('create'); };
+    const openCreate = () => { setForm({ ...empty }); setEditId(null); setPreviewMode(false); setModal('create'); };
     const openEdit = (item) => {
         setForm({
             title: item.title || '',
-            content: JSON.stringify(item.content || {}, null, 2),
+            content: getContentString(item.content),
         });
-        setEditId(item.id); setModal('edit');
+        setEditId(item.id);
+        setPreviewMode(false);
+        setModal('edit');
     };
 
     const handleSave = async () => {
         try {
-            let parsed;
-            try { parsed = JSON.parse(form.content); } catch { parsed = {}; }
             const body = {
                 title: form.title,
-                content: parsed,
+                content: form.content, // Save as string directly
                 ...(modal === 'create' && { ownerId: getUserId() }),
             };
             if (modal === 'edit') { await update('worksheets', editId, body); toast('Worksheet updated!'); }
@@ -58,6 +97,11 @@ export default function WorksheetsPage() {
         catch (e) { toast(e.message, 'error'); }
     };
 
+    const handleAIComplete = (generatedContent) => {
+        setForm(prev => ({ ...prev, content: generatedContent }));
+        setAiModal(false);
+    };
+
     return (
         <>
             <div className="table-container">
@@ -69,7 +113,7 @@ export default function WorksheetsPage() {
                     </div>
                 </div>
                 {loading ? <div className="loading-center"><div className="spinner" /></div> : filtered.length === 0 ? (
-                    <div className="empty-state"><Layout /><h3>No worksheets yet</h3><p>Create your first workspace</p></div>
+                    <div className="empty-state"><Layout /><h3>No worksheets yet</h3><p>Create your first worksheet</p></div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16, padding: 20 }}>
                         {filtered.map(item => (
@@ -86,15 +130,12 @@ export default function WorksheetsPage() {
                                         <UsersIcon size={12} /> {item.expand.ownerId.name || item.expand.ownerId.email}
                                     </div>
                                 )}
-                                {Array.isArray(item.members) && item.members.length > 0 && (
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>
-                                        <span className="badge badge-info">{item.members.length} member{item.members.length > 1 ? 's' : ''}</span>
-                                    </div>
-                                )}
-                                {item.content && typeof item.content === 'object' && Object.keys(item.content).length > 0 && (
-                                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
-                                        {Object.keys(item.content).map(k => <span key={k} className="badge badge-primary">{k}</span>)}
-                                    </div>
+                                {/* Markdown content preview */}
+                                {item.content && (
+                                    <div
+                                        className="markdown-preview card-md-preview"
+                                        dangerouslySetInnerHTML={{ __html: renderMarkdown(getContentString(item.content)) }}
+                                    />
                                 )}
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 10 }}>
                                     {new Date(item.created).toLocaleDateString()}
@@ -105,17 +146,65 @@ export default function WorksheetsPage() {
                 )}
             </div>
 
+            {/* Create / Edit Modal */}
             {modal && (
                 <Modal title={modal === 'edit' ? 'Edit Worksheet' : 'New Worksheet'} onClose={() => setModal(null)} footer={
                     <><button className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSave}>Save</button></>
                 }>
                     <div className="form-group"><label className="form-label">Title *</label><input className="form-input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Worksheet title..." /></div>
                     <div className="form-group">
-                        <label className="form-label">Content (JSON)</label>
-                        <textarea className="form-textarea" style={{ fontFamily: 'monospace', fontSize: '0.8rem', minHeight: 160 }} value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} placeholder='{"key": "value"}' />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <label className="form-label" style={{ margin: 0 }}>Content</label>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                                <button
+                                    className={`btn btn-sm ${!previewMode ? 'btn-primary' : 'btn-secondary'}`}
+                                    onClick={() => setPreviewMode(false)}
+                                    style={{ padding: '3px 10px', fontSize: '0.75rem' }}
+                                >
+                                    <Pencil size={12} /> Edit
+                                </button>
+                                <button
+                                    className={`btn btn-sm ${previewMode ? 'btn-primary' : 'btn-secondary'}`}
+                                    onClick={() => setPreviewMode(true)}
+                                    style={{ padding: '3px 10px', fontSize: '0.75rem' }}
+                                >
+                                    <Eye size={12} /> Preview
+                                </button>
+                                <button
+                                    className="btn btn-ai btn-sm"
+                                    onClick={() => setAiModal(true)}
+                                    style={{ padding: '3px 10px', fontSize: '0.75rem' }}
+                                >
+                                    <Sparkles size={12} /> AI Generate
+                                </button>
+                            </div>
+                        </div>
+                        {previewMode ? (
+                            <div
+                                className="markdown-preview form-md-preview"
+                                dangerouslySetInnerHTML={{ __html: renderMarkdown(form.content) }}
+                            />
+                        ) : (
+                            <textarea
+                                className="form-textarea"
+                                style={{ minHeight: 200, fontFamily: "'Inter', monospace", fontSize: '0.85rem' }}
+                                value={form.content}
+                                onChange={e => setForm({ ...form, content: e.target.value })}
+                                placeholder="Write your worksheet content in Markdown..."
+                            />
+                        )}
                     </div>
                 </Modal>
             )}
+
+            {/* AI Generation Modal */}
+            {aiModal && (
+                <WorksheetAIModal
+                    onClose={() => setAiModal(false)}
+                    onComplete={handleAIComplete}
+                />
+            )}
+
             {deleteId && <ConfirmDialog message="Delete this worksheet? All related data will also be deleted." onConfirm={handleDelete} onCancel={() => setDeleteId(null)} />}
         </>
     );

@@ -1760,3 +1760,241 @@ tbody tr:last-child td {
     right: 16px;
   }
 }
+
+/* ===== MARKDOWN PREVIEW ===== */
+.markdown-preview {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.markdown-preview h1 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-white);
+  margin: 14px 0 8px;
+}
+
+.markdown-preview h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-white);
+  margin: 12px 0 6px;
+}
+
+.markdown-preview h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 10px 0 4px;
+}
+
+.markdown-preview h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 8px 0 4px;
+}
+
+.markdown-preview strong {
+  color: var(--text-white);
+  font-weight: 700;
+}
+
+.markdown-preview em {
+  font-style: italic;
+  color: var(--primary-light);
+}
+
+.markdown-preview ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+.markdown-preview li {
+  margin-bottom: 3px;
+}
+
+.markdown-preview hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+.markdown-preview p {
+  margin: 4px 0;
+}
+
+.card-md-preview {
+  max-height: 160px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 8px;
+}
+
+.card-md-preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: linear-gradient(transparent, var(--bg-card));
+  pointer-events: none;
+}
+
+.form-md-preview {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* ===== AI BUTTON ===== */
+.btn-ai {
+  background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 206, 201, 0.25);
+}
+
+.btn-ai:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 206, 201, 0.35);
+}
+
+.btn-ai:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== AI MODAL ===== */
+.ai-modal-form .form-textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.ai-field-error {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-top: 4px;
+}
+
+.form-textarea.form-error {
+  border-color: var(--danger);
+}
+
+.form-textarea.form-error:focus {
+  box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2);
+}
+
+.ai-modal-result {
+  min-height: 200px;
+}
+
+.ai-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--primary-glow);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary);
+  color: var(--primary-light);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.ai-spin {
+  animation: spin 1s linear infinite;
+}
+
+.ai-stream-content {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  background: var(--bg-input);
+}
+
+.ai-stream-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.ai-skeleton {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(225, 112, 85, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin-top: 12px;
+}
+
+.ai-done-msg {
+  padding: 12px 16px;
+  background: rgba(0, 184, 148, 0.1);
+  border: 1px solid var(--success);
+  border-radius: var(--radius-sm);
+  color: var(--success);
+  font-size: 0.85rem;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* Skeleton lines (reuse for AI) */
+.skeleton-line {
+  height: 12px;
+  background: linear-gradient(90deg, var(--border), rgba(255, 255, 255, 0.05), var(--border));
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-line.w40 {
+  width: 40%;
+}
+
+.skeleton-line.w60 {
+  width: 60%;
+}
+
+.skeleton-line.w80 {
+  width: 80%;
+}
+
+.skeleton-line.w90 {
+  width: 90%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}

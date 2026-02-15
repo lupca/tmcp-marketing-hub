@@ -1,4 +1,6 @@
 // Worksheet AI Generation API client (SSE streaming)
+import { streamSSE } from './chatApi';
+
 const AGENTS_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
 
 /**
@@ -21,32 +23,5 @@ export async function generateWorksheet(data, onEvent, signal) {
         throw new Error(`Worksheet API error: ${res.status} — ${errBody}`);
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop(); // keep incomplete line
-
-        for (const line of lines) {
-            if (line.startsWith('data: ')) {
-                try {
-                    const parsed = JSON.parse(line.slice(6));
-                    onEvent(parsed);
-                } catch { /* skip malformed */ }
-            }
-        }
-    }
-    // Remaining buffer
-    if (buffer.startsWith('data: ')) {
-        try {
-            const parsed = JSON.parse(buffer.slice(6));
-            onEvent(parsed);
-        } catch { /* skip */ }
-    }
+    await streamSSE(res, onEvent);
 }

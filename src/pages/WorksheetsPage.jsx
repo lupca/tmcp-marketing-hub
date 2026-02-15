@@ -1,46 +1,11 @@
 import { useEffect, useState } from 'react';
 import { list, create, update, remove, getUserId } from '../lib/pb';
+import { renderMarkdown, getContentString } from '../lib/markdown';
 import { useToast } from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import WorksheetAIModal from '../components/WorksheetAIModal';
 import { Plus, Search, Edit2, Trash2, Layout, Users as UsersIcon, Sparkles, Eye, Pencil } from 'lucide-react';
-
-/* ---- Lightweight Markdown renderer ---- */
-function renderMarkdown(md) {
-    if (!md || typeof md !== 'string') return '';
-    let html = md
-        // Escape HTML
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        // Headers
-        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        // Bold & Italic
-        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        // Unordered lists
-        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
-        // Horizontal rule
-        .replace(/^---$/gm, '<hr/>')
-        // Line breaks (double newline = paragraph, single = <br>)
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br/>');
-    // Wrap <li> groups in <ul>
-    html = html.replace(/((?:<li>.*?<\/li><br\/>?)+)/g, '<ul>$1</ul>');
-    html = html.replace(/<ul>(.*?)<\/ul>/gs, (_, inner) => '<ul>' + inner.replace(/<br\/>/g, '') + '</ul>');
-    return '<p>' + html + '</p>';
-}
-
-/* ---- Content display: handle both old JSON and new string content ---- */
-function getContentString(content) {
-    if (!content) return '';
-    if (typeof content === 'string') return content;
-    if (typeof content === 'object') return JSON.stringify(content, null, 2);
-    return String(content);
-}
 
 const empty = { title: '', content: '' };
 

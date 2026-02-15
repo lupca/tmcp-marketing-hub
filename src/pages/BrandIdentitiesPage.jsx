@@ -3,7 +3,8 @@ import { list, create, update, remove, getUserId } from '../lib/pb';
 import { useToast } from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { Plus, Search, Edit2, Trash2, Palette, ExternalLink } from 'lucide-react';
+import BrandIdentityAIModal from '../components/BrandIdentityAIModal';
+import { Plus, Search, Edit2, Trash2, Palette, ExternalLink, Sparkles } from 'lucide-react';
 
 const empty = { worksheetId: '', brandName: '', slogan: '', missionStatement: '', logoUrl: '', colorPalette: '[]', keywords: '[]' };
 
@@ -16,6 +17,7 @@ export default function BrandIdentitiesPage() {
     const [deleteId, setDeleteId] = useState(null);
     const [form, setForm] = useState({ ...empty });
     const [editId, setEditId] = useState(null);
+    const [showAIModal, setShowAIModal] = useState(false);
     const toast = useToast();
 
     const load = async () => {
@@ -109,6 +111,11 @@ export default function BrandIdentitiesPage() {
                 <Modal title={modal === 'edit' ? 'Edit Brand' : 'New Brand Identity'} onClose={() => setModal(null)} footer={
                     <><button className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSave}>Save</button></>
                 }>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                        <button className="btn btn-ai btn-sm" onClick={() => setShowAIModal(true)}>
+                            <Sparkles size={14} /> Generate with AI
+                        </button>
+                    </div>
                     <div className="form-group">
                         <label className="form-label">Worksheet *</label>
                         <select className="form-select" value={form.worksheetId} onChange={e => setForm({ ...form, worksheetId: e.target.value })}>
@@ -127,6 +134,23 @@ export default function BrandIdentitiesPage() {
                 </Modal>
             )}
             {deleteId && <ConfirmDialog message="Delete this brand identity?" onConfirm={handleDelete} onCancel={() => setDeleteId(null)} />}
+            {showAIModal && (
+                <BrandIdentityAIModal
+                    worksheets={worksheets}
+                    onClose={() => setShowAIModal(false)}
+                    onComplete={(data) => {
+                        setForm(f => ({
+                            ...f,
+                            brandName: data.brandName || f.brandName,
+                            slogan: data.slogan || f.slogan,
+                            missionStatement: data.missionStatement || f.missionStatement,
+                            keywords: JSON.stringify(data.keywords || [], null, 2),
+                            colorPalette: JSON.stringify(data.colorPalette || [], null, 2),
+                        }));
+                        setShowAIModal(false);
+                    }}
+                />
+            )}
         </>
     );
 }

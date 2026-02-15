@@ -3,30 +3,39 @@ import { list, create, update, remove, getUserId } from '../lib/pb';
 import { useToast } from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { Plus, Search, Edit2, Trash2, Megaphone } from 'lucide-react';
+import CustomerProfileAIModal from '../components/CustomerProfileAIModal'; // Copied pattern, but need MarketingStrategyAIModal
+import MarketingStrategyAIModal from '../components/MarketingStrategyAIModal';
+import { Plus, Search, Edit2, Trash2, Megaphone, Sparkles } from 'lucide-react';
 
 const empty = { worksheetId: '', name: '', goal: '', acquisitionStrategy: '', positioning: '', valueProposition: '', toneOfVoice: '' };
 
 export default function CampaignsPage() {
     const [items, setItems] = useState([]);
     const [worksheets, setWorksheets] = useState([]);
+    const [brandIdentities, setBrandIdentities] = useState([]);
+    const [customerProfiles, setCustomerProfiles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
     const [form, setForm] = useState({ ...empty });
     const [editId, setEditId] = useState(null);
+    const [showAI, setShowAI] = useState(false);
     const toast = useToast();
 
     const load = async () => {
         setLoading(true);
         try {
-            const [res, wsRes] = await Promise.all([
+            const [res, wsRes, biRes, icpRes] = await Promise.all([
                 list('marketing_campaigns', { perPage: 200, expand: 'worksheetId' }),
                 list('worksheets', { perPage: 200 }),
+                list('brand_identities', { perPage: 200 }),
+                list('ideal_customer_profiles', { perPage: 200 }),
             ]);
             setItems(res.items || []);
             setWorksheets(wsRes.items || []);
+            setBrandIdentities(biRes.items || []);
+            setCustomerProfiles(icpRes.items || []);
         } catch (e) { toast(e.message, 'error'); }
         setLoading(false);
     };
@@ -93,6 +102,11 @@ export default function CampaignsPage() {
                 <Modal title={modal === 'edit' ? 'Edit Campaign' : 'New Campaign'} onClose={() => setModal(null)} footer={
                     <><button className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSave}>Save</button></>
                 }>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                        <button className="btn btn-sm" style={{ background: 'var(--success)', color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }} onClick={() => setShowAI(true)}>
+                            <Sparkles size={14} /> Generate with AI
+                        </button>
+                    </div>
                     <div className="form-row">
                         <div className="form-group"><label className="form-label">Campaign Name *</label><input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
                         <div className="form-group">
@@ -113,7 +127,29 @@ export default function CampaignsPage() {
                         <div className="form-group"><label className="form-label">Tone of Voice</label><input className="form-input" value={form.toneOfVoice} onChange={e => setForm({ ...form, toneOfVoice: e.target.value })} placeholder="Professional, Friendly..." /></div>
                     </div>
                 </Modal>
-            )}
+            )
+            }
+            {
+                showAI && (
+                    <MarketingStrategyAIModal
+                        worksheets={worksheets}
+                        brandIdentities={brandIdentities}
+                        customerProfiles={customerProfiles}
+                        onClose={() => setShowAI(false)}
+                        onComplete={(data) => {
+                            setForm(f => ({
+                                ...f,
+                                goal: data.goal || f.goal, // Sync user prompt to goal field
+                                acquisitionStrategy: data.acquisitionStrategy || f.acquisitionStrategy,
+                                positioning: data.positioning || f.positioning,
+                                valueProposition: data.valueProposition || f.valueProposition,
+                                toneOfVoice: data.toneOfVoice || f.toneOfVoice,
+                            }));
+                            toast('AI Strategy applied!', 'success');
+                        }}
+                    />
+                )
+            }
             {deleteId && <ConfirmDialog message="Delete this campaign?" onConfirm={handleDelete} onCancel={() => setDeleteId(null)} />}
         </>
     );

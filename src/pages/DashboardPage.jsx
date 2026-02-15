@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { list } from '../lib/pb';
-import { Lightbulb, Palette, Users, Megaphone, ListTodo, CalendarDays, Share2, FileText, TrendingUp } from 'lucide-react';
+import { Layout as LayoutIcon, Palette, Users, Megaphone, ListTodo, CalendarDays, Share2, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
 const COLORS = ['#6c5ce7', '#00cec9', '#fdcb6e', '#e17055', '#74b9ff', '#a29bfe', '#55efc4'];
@@ -14,25 +14,23 @@ export default function DashboardPage() {
     useEffect(() => {
         async function load() {
             try {
-                const [ideas, brands, customers, campaigns, taskData, events, socialPosts, blogPosts] = await Promise.all([
-                    list('business_ideas', { perPage: 1 }),
+                const [worksheets, brands, customers, campaigns, taskData, events, socialPosts] = await Promise.all([
+                    list('worksheets', { perPage: 1 }),
                     list('brand_identities', { perPage: 1 }),
-                    list('customer_profiles', { perPage: 1 }),
+                    list('ideal_customer_profiles', { perPage: 1 }),
                     list('marketing_campaigns', { perPage: 1 }),
                     list('campaign_tasks', { perPage: 200 }),
                     list('content_calendar_events', { perPage: 1 }),
                     list('social_posts', { perPage: 200 }),
-                    list('posts', { perPage: 1 }),
                 ]);
                 setStats({
-                    ideas: ideas.totalItems,
+                    worksheets: worksheets.totalItems,
                     brands: brands.totalItems,
                     customers: customers.totalItems,
                     campaigns: campaigns.totalItems,
                     tasks: taskData.totalItems,
                     events: events.totalItems,
                     socialPosts: socialPosts.totalItems,
-                    blogPosts: blogPosts.totalItems,
                 });
                 setTasks(taskData.items || []);
                 setPosts(socialPosts.items || []);
@@ -45,14 +43,13 @@ export default function DashboardPage() {
     if (loading) return <div className="loading-center"><div className="spinner" /></div>;
 
     const statCards = [
-        { label: 'Business Ideas', value: stats.ideas, icon: Lightbulb, color: '#fdcb6e' },
+        { label: 'Worksheets', value: stats.worksheets, icon: LayoutIcon, color: '#fdcb6e' },
         { label: 'Brands', value: stats.brands, icon: Palette, color: '#6c5ce7' },
         { label: 'Customers', value: stats.customers, icon: Users, color: '#00cec9' },
         { label: 'Campaigns', value: stats.campaigns, icon: Megaphone, color: '#e17055' },
         { label: 'Tasks', value: stats.tasks, icon: ListTodo, color: '#74b9ff' },
         { label: 'Calendar Events', value: stats.events, icon: CalendarDays, color: '#55efc4' },
         { label: 'Social Posts', value: stats.socialPosts, icon: Share2, color: '#a29bfe' },
-        { label: 'Blog Posts', value: stats.blogPosts, icon: FileText, color: '#fdcb6e' },
     ];
 
     // Task status chart

@@ -1,8 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import {
-    LayoutDashboard, Lightbulb, Palette, Users, Megaphone, ListTodo,
-    CalendarDays, Share2, FileText, PanelLeftClose, PanelLeft, Zap, LogOut
+    LayoutDashboard, Layout as LayoutIcon, Palette, Users, Megaphone, ListTodo,
+    CalendarDays, Share2, PanelLeftClose, PanelLeft, Zap, LogOut
 } from 'lucide-react';
 import { logout } from '../lib/pb';
 import AgentChat from './AgentChat';
@@ -11,7 +11,7 @@ const navItems = [
     { section: 'Overview' },
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { section: 'Marketing' },
-    { to: '/business-ideas', icon: Lightbulb, label: 'Business Ideas' },
+    { to: '/worksheets', icon: LayoutIcon, label: 'Worksheets' },
     { to: '/brands', icon: Palette, label: 'Brand Identities' },
     { to: '/customers', icon: Users, label: 'Customer Profiles' },
     { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
@@ -19,19 +19,17 @@ const navItems = [
     { section: 'Content' },
     { to: '/calendar', icon: CalendarDays, label: 'Calendar' },
     { to: '/social-posts', icon: Share2, label: 'Social Posts' },
-    { to: '/posts', icon: FileText, label: 'Blog Posts' },
 ];
 
 const pageTitles = {
     '/': 'Dashboard',
-    '/business-ideas': 'Business Ideas',
+    '/worksheets': 'Worksheets',
     '/brands': 'Brand Identities',
     '/customers': 'Customer Profiles',
     '/campaigns': 'Marketing Campaigns',
     '/tasks': 'Campaign Tasks',
     '/calendar': 'Content Calendar',
     '/social-posts': 'Social Posts',
-    '/posts': 'Blog Posts',
 };
 
 export default function Layout({ children }) {

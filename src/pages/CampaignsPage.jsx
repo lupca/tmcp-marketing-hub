@@ -3,12 +3,13 @@ import { list, create, update, remove, getUserId } from '../lib/pb';
 import { useToast } from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { Plus, Search, Edit2, Trash2, Megaphone, Globe } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Megaphone } from 'lucide-react';
 
-const empty = { name: '', goal: '', language: 'en', acquisitionStrategy: '', positioning: '', valueProposition: '', toneOfVoice: '' };
+const empty = { worksheetId: '', name: '', goal: '', acquisitionStrategy: '', positioning: '', valueProposition: '', toneOfVoice: '' };
 
 export default function CampaignsPage() {
     const [items, setItems] = useState([]);
+    const [worksheets, setWorksheets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState(null);
@@ -19,8 +20,14 @@ export default function CampaignsPage() {
 
     const load = async () => {
         setLoading(true);
-        try { const res = await list('marketing_campaigns', { perPage: 200 }); setItems(res.items || []); }
-        catch (e) { toast(e.message, 'error'); }
+        try {
+            const [res, wsRes] = await Promise.all([
+                list('marketing_campaigns', { perPage: 200, expand: 'worksheetId' }),
+                list('worksheets', { perPage: 200 }),
+            ]);
+            setItems(res.items || []);
+            setWorksheets(wsRes.items || []);
+        } catch (e) { toast(e.message, 'error'); }
         setLoading(false);
     };
     useEffect(() => { load(); }, []);
@@ -29,7 +36,7 @@ export default function CampaignsPage() {
 
     const openCreate = () => { setForm({ ...empty }); setEditId(null); setModal('create'); };
     const openEdit = (item) => {
-        setForm({ name: item.name || '', goal: item.goal || '', language: item.language || 'en', acquisitionStrategy: item.acquisitionStrategy || '', positioning: item.positioning || '', valueProposition: item.valueProposition || '', toneOfVoice: item.toneOfVoice || '' });
+        setForm({ worksheetId: item.worksheetId || '', name: item.name || '', goal: item.goal || '', acquisitionStrategy: item.acquisitionStrategy || '', positioning: item.positioning || '', valueProposition: item.valueProposition || '', toneOfVoice: item.toneOfVoice || '' });
         setEditId(item.id); setModal('edit');
     };
 
@@ -61,13 +68,13 @@ export default function CampaignsPage() {
                     <div className="empty-state"><Megaphone /><h3>No campaigns yet</h3><p>Launch your first marketing campaign</p></div>
                 ) : (
                     <table>
-                        <thead><tr><th>Campaign</th><th>Goal</th><th>Language</th><th>Tone</th><th style={{ width: 100 }}>Actions</th></tr></thead>
+                        <thead><tr><th>Campaign</th><th>Worksheet</th><th>Goal</th><th>Tone</th><th style={{ width: 100 }}>Actions</th></tr></thead>
                         <tbody>
                             {filtered.map(item => (
                                 <tr key={item.id}>
                                     <td style={{ fontWeight: 600 }}>{item.name}</td>
+                                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{item.expand?.worksheetId?.title || '—'}</td>
                                     <td style={{ maxWidth: 200, color: 'var(--text-secondary)' }}>{item.goal || '—'}</td>
-                                    <td><span className="badge badge-info"><Globe size={12} style={{ marginRight: 4 }} />{item.language?.toUpperCase()}</span></td>
                                     <td><span className="badge badge-primary">{item.toneOfVoice || '—'}</span></td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 6 }}>
@@ -89,8 +96,11 @@ export default function CampaignsPage() {
                     <div className="form-row">
                         <div className="form-group"><label className="form-label">Campaign Name *</label><input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
                         <div className="form-group">
-                            <label className="form-label">Language</label>
-                            <select className="form-select" value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}><option value="en">English</option><option value="vi">Vietnamese</option></select>
+                            <label className="form-label">Worksheet *</label>
+                            <select className="form-select" value={form.worksheetId} onChange={e => setForm({ ...form, worksheetId: e.target.value })}>
+                                <option value="">Select worksheet...</option>
+                                {worksheets.map(w => <option key={w.id} value={w.id}>{w.title}</option>)}
+                            </select>
                         </div>
                     </div>
                     <div className="form-group"><label className="form-label">Goal</label><textarea className="form-textarea" value={form.goal} onChange={e => setForm({ ...form, goal: e.target.value })} /></div>

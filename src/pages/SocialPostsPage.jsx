@@ -5,12 +5,13 @@ import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { Plus, Search, Edit2, Trash2, Share2 } from 'lucide-react';
 
-const platforms = ['Web', 'LinkedIn', 'Facebook', 'Twitter', 'Instagram'];
-const empty = { platform: 'Web', content: '', seoTitle: '', seoDescription: '', imageUrl: '', campaignId: '', eventId: '' };
+const platforms = ['Facebook', 'LinkedIn', 'Instagram', 'Twitter', 'TikTok', 'YouTube', 'Other'];
+const empty = { platform: 'Facebook', content: '', seoTitle: '', seoDescription: '', imageUrl: '', campaignId: '', eventId: '' };
 
 export default function SocialPostsPage() {
     const [items, setItems] = useState([]);
     const [campaigns, setCampaigns] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState(null);
@@ -22,12 +23,14 @@ export default function SocialPostsPage() {
     const load = async () => {
         setLoading(true);
         try {
-            const [postRes, campRes] = await Promise.all([
-                list('social_posts', { perPage: 200, expand: 'campaignId' }),
+            const [postRes, campRes, evRes] = await Promise.all([
+                list('social_posts', { perPage: 200, expand: 'campaignId,eventId' }),
                 list('marketing_campaigns', { perPage: 200 }),
+                list('content_calendar_events', { perPage: 500 }),
             ]);
             setItems(postRes.items || []);
             setCampaigns(campRes.items || []);
+            setEvents(evRes.items || []);
         } catch (e) { toast(e.message, 'error'); }
         setLoading(false);
     };
@@ -37,7 +40,7 @@ export default function SocialPostsPage() {
 
     const openCreate = () => { setForm({ ...empty }); setEditId(null); setModal('create'); };
     const openEdit = (item) => {
-        setForm({ platform: item.platform || 'Web', content: item.content || '', seoTitle: item.seoTitle || '', seoDescription: item.seoDescription || '', imageUrl: item.imageUrl || '', campaignId: item.campaignId || '', eventId: item.eventId || '' });
+        setForm({ platform: item.platform || 'Facebook', content: item.content || '', seoTitle: item.seoTitle || '', seoDescription: item.seoDescription || '', imageUrl: item.imageUrl || '', campaignId: item.campaignId || '', eventId: item.eventId || '' });
         setEditId(item.id); setModal('edit');
     };
 
@@ -69,7 +72,7 @@ export default function SocialPostsPage() {
                     <div className="empty-state"><Share2 /><h3>No posts yet</h3><p>Create your first social media post</p></div>
                 ) : (
                     <table>
-                        <thead><tr><th>Platform</th><th>Content</th><th>SEO Title</th><th>Campaign</th><th style={{ width: 100 }}>Actions</th></tr></thead>
+                        <thead><tr><th>Platform</th><th>Content</th><th>SEO Title</th><th>Campaign</th><th>Event</th><th style={{ width: 100 }}>Actions</th></tr></thead>
                         <tbody>
                             {filtered.map(item => (
                                 <tr key={item.id}>
@@ -77,6 +80,7 @@ export default function SocialPostsPage() {
                                     <td style={{ maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.content}</td>
                                     <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{item.seoTitle || '—'}</td>
                                     <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{item.expand?.campaignId?.name || '—'}</td>
+                                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{item.expand?.eventId?.title || '—'}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 6 }}>
                                             <button className="btn-icon" onClick={() => openEdit(item)}><Edit2 size={15} /></button>
@@ -102,12 +106,19 @@ export default function SocialPostsPage() {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Campaign</label>
+                            <label className="form-label">Campaign *</label>
                             <select className="form-select" value={form.campaignId} onChange={e => setForm({ ...form, campaignId: e.target.value })}>
-                                <option value="">No campaign</option>
+                                <option value="">Select campaign...</option>
                                 {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Calendar Event</label>
+                        <select className="form-select" value={form.eventId} onChange={e => setForm({ ...form, eventId: e.target.value })}>
+                            <option value="">No event</option>
+                            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.title} ({ev.eventDate ? new Date(ev.eventDate).toLocaleDateString() : 'no date'})</option>)}
+                        </select>
                     </div>
                     <div className="form-group"><label className="form-label">Content *</label><textarea className="form-textarea" style={{ minHeight: 140 }} value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} placeholder="Write your social post content..." /></div>
                     <div className="form-row">

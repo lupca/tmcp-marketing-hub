@@ -5,10 +5,11 @@ import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { Plus, Search, Edit2, Trash2, Palette, ExternalLink } from 'lucide-react';
 
-const empty = { brandName: '', slogan: '', missionStatement: '', logoUrl: '', colorPalette: '[]', keywords: '[]' };
+const empty = { worksheetId: '', brandName: '', slogan: '', missionStatement: '', logoUrl: '', colorPalette: '[]', keywords: '[]' };
 
 export default function BrandIdentitiesPage() {
     const [items, setItems] = useState([]);
+    const [worksheets, setWorksheets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState(null);
@@ -19,8 +20,14 @@ export default function BrandIdentitiesPage() {
 
     const load = async () => {
         setLoading(true);
-        try { const res = await list('brand_identities', { perPage: 200 }); setItems(res.items || []); }
-        catch (e) { toast(e.message, 'error'); }
+        try {
+            const [res, wsRes] = await Promise.all([
+                list('brand_identities', { perPage: 200, expand: 'worksheetId' }),
+                list('worksheets', { perPage: 200 }),
+            ]);
+            setItems(res.items || []);
+            setWorksheets(wsRes.items || []);
+        } catch (e) { toast(e.message, 'error'); }
         setLoading(false);
     };
     useEffect(() => { load(); }, []);
@@ -30,6 +37,7 @@ export default function BrandIdentitiesPage() {
     const openCreate = () => { setForm({ ...empty }); setEditId(null); setModal('create'); };
     const openEdit = (item) => {
         setForm({
+            worksheetId: item.worksheetId || '',
             brandName: item.brandName || '', slogan: item.slogan || '', missionStatement: item.missionStatement || '',
             logoUrl: item.logoUrl || '', colorPalette: JSON.stringify(item.colorPalette || [], null, 2),
             keywords: JSON.stringify(item.keywords || [], null, 2),
@@ -42,7 +50,7 @@ export default function BrandIdentitiesPage() {
             let cp, kw;
             try { cp = JSON.parse(form.colorPalette); } catch { cp = []; }
             try { kw = JSON.parse(form.keywords); } catch { kw = []; }
-            const body = { brandName: form.brandName, slogan: form.slogan, missionStatement: form.missionStatement, logoUrl: form.logoUrl, colorPalette: cp, keywords: kw, ...(modal === 'create' && { userId: getUserId() }) };
+            const body = { worksheetId: form.worksheetId, brandName: form.brandName, slogan: form.slogan, missionStatement: form.missionStatement, logoUrl: form.logoUrl, colorPalette: cp, keywords: kw, ...(modal === 'create' && { userId: getUserId() }) };
             if (modal === 'edit') { await update('brand_identities', editId, body); toast('Brand updated!'); }
             else { await create('brand_identities', body); toast('Brand created!'); }
             setModal(null); load();
@@ -77,6 +85,7 @@ export default function BrandIdentitiesPage() {
                                         <button className="btn-icon" onClick={() => setDeleteId(item.id)} style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}><Trash2 size={14} /></button>
                                     </div>
                                 </div>
+                                {item.expand?.worksheetId && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 8 }}>📋 {item.expand.worksheetId.title}</div>}
                                 {item.slogan && <p style={{ color: 'var(--primary-light)', fontStyle: 'italic', marginBottom: 8, fontSize: '0.9rem' }}>"{item.slogan}"</p>}
                                 {item.missionStatement && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 12 }}>{item.missionStatement}</p>}
                                 {item.logoUrl && <a href={item.logoUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.8rem' }}><ExternalLink size={12} /> Logo</a>}
@@ -100,6 +109,13 @@ export default function BrandIdentitiesPage() {
                 <Modal title={modal === 'edit' ? 'Edit Brand' : 'New Brand Identity'} onClose={() => setModal(null)} footer={
                     <><button className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSave}>Save</button></>
                 }>
+                    <div className="form-group">
+                        <label className="form-label">Worksheet *</label>
+                        <select className="form-select" value={form.worksheetId} onChange={e => setForm({ ...form, worksheetId: e.target.value })}>
+                            <option value="">Select worksheet...</option>
+                            {worksheets.map(w => <option key={w.id} value={w.id}>{w.title}</option>)}
+                        </select>
+                    </div>
                     <div className="form-group"><label className="form-label">Brand Name *</label><input className="form-input" value={form.brandName} onChange={e => setForm({ ...form, brandName: e.target.value })} /></div>
                     <div className="form-group"><label className="form-label">Slogan</label><input className="form-input" value={form.slogan} onChange={e => setForm({ ...form, slogan: e.target.value })} /></div>
                     <div className="form-group"><label className="form-label">Mission Statement</label><textarea className="form-textarea" value={form.missionStatement} onChange={e => setForm({ ...form, missionStatement: e.target.value })} /></div>

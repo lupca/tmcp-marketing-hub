@@ -3,30 +3,35 @@ import { list, create, update, remove, getUserId } from '../lib/pb';
 import { useToast } from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { Plus, Search, Edit2, Trash2, Users } from 'lucide-react';
+import CustomerProfileAIModal from '../components/CustomerProfileAIModal';
+import { Plus, Search, Edit2, Trash2, Users, Sparkles } from 'lucide-react';
 
 const empty = { worksheetId: '', personaName: '', summary: '', demographics: '{}', psychographics: '{}', goalsAndMotivations: '{}', painPointsAndChallenges: '{}', painPoints: '[]' };
 
 export default function CustomerProfilesPage() {
     const [items, setItems] = useState([]);
     const [worksheets, setWorksheets] = useState([]);
+    const [brandIdentities, setBrandIdentities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
     const [form, setForm] = useState({ ...empty });
     const [editId, setEditId] = useState(null);
+    const [showAI, setShowAI] = useState(false);
     const toast = useToast();
 
     const load = async () => {
         setLoading(true);
         try {
-            const [res, wsRes] = await Promise.all([
+            const [res, wsRes, biRes] = await Promise.all([
                 list('ideal_customer_profiles', { perPage: 200, expand: 'worksheetId' }),
                 list('worksheets', { perPage: 200 }),
+                list('brand_identities', { perPage: 200 }),
             ]);
             setItems(res.items || []);
             setWorksheets(wsRes.items || []);
+            setBrandIdentities(biRes.items || []);
         } catch (e) { toast(e.message, 'error'); }
         setLoading(false);
     };
@@ -118,6 +123,11 @@ export default function CustomerProfilesPage() {
                 <Modal title={modal === 'edit' ? 'Edit Profile' : 'New Customer Profile'} onClose={() => setModal(null)} footer={
                     <><button className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" onClick={handleSave}>Save</button></>
                 }>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                        <button className="btn btn-sm" style={{ background: 'var(--success)', color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }} onClick={() => setShowAI(true)}>
+                            <Sparkles size={14} /> Generate with AI
+                        </button>
+                    </div>
                     <div className="form-group">
                         <label className="form-label">Worksheet *</label>
                         <select className="form-select" value={form.worksheetId} onChange={e => setForm({ ...form, worksheetId: e.target.value })}>
@@ -139,6 +149,24 @@ export default function CustomerProfilesPage() {
                     </div>
                     <div className="form-group"><label className="form-label">Pain Points (JSON Array)</label><textarea className="form-textarea" style={{ fontFamily: 'monospace', fontSize: '0.8rem' }} value={form.painPoints} onChange={e => setForm({ ...form, painPoints: e.target.value })} placeholder='["Pain point 1", "Pain point 2"]' /></div>
                 </Modal>
+            )}
+            {showAI && (
+                <CustomerProfileAIModal
+                    brandIdentities={brandIdentities}
+                    onClose={() => setShowAI(false)}
+                    onComplete={(data) => {
+                        setForm(f => ({
+                            ...f,
+                            personaName: data.personaName || f.personaName,
+                            summary: data.summary || f.summary,
+                            demographics: data.demographics ? JSON.stringify(data.demographics, null, 2) : f.demographics,
+                            psychographics: data.psychographics ? JSON.stringify(data.psychographics, null, 2) : f.psychographics,
+                            goalsAndMotivations: data.goalsAndMotivations ? JSON.stringify(data.goalsAndMotivations, null, 2) : f.goalsAndMotivations,
+                            painPointsAndChallenges: data.painPointsAndChallenges ? JSON.stringify(data.painPointsAndChallenges, null, 2) : f.painPointsAndChallenges,
+                        }));
+                        toast('AI data applied to form!', 'success');
+                    }}
+                />
             )}
             {deleteId && <ConfirmDialog message="Delete this customer profile?" onConfirm={handleDelete} onCancel={() => setDeleteId(null)} />}
         </>

@@ -212,10 +212,10 @@ export default function WorksheetsPage() {
                                 <div className="flex justify-between items-start mb-3">
                                     <h3 className="font-bold text-lg text-gray-900 line-clamp-1" title={item.title}>{item.title}</h3>
                                     <div className="flex gap-1 ml-2">
-                                        <button className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50" onClick={() => openEdit(item)}>
+                                        <button title="Edit" className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50" onClick={() => openEdit(item)}>
                                             <Edit2 size={16} />
                                         </button>
-                                        <button className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50" onClick={() => setDeleteId(item.id)}>
+                                        <button title="Delete" className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50" onClick={() => setDeleteId(item.id)}>
                                             <Trash2 size={16} />
                                         </button>
                                     </div>

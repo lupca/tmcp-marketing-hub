@@ -221,9 +221,9 @@ export default function SocialPostsPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${item.publish_status === 'published' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                    item.publish_status === 'scheduled' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                        item.publish_status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                            'bg-gray-50 text-gray-600 border-gray-200'
+                                                item.publish_status === 'scheduled' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                    item.publish_status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                        'bg-gray-50 text-gray-600 border-gray-200'
                                                 }`}>
                                                 {item.publish_status}
                                             </span>
@@ -233,10 +233,10 @@ export default function SocialPostsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button className="text-gray-400 hover:text-blue-600" onClick={() => openEdit(item)}>
+                                                <button title="Edit" className="text-gray-400 hover:text-blue-600" onClick={() => openEdit(item)}>
                                                     <Edit2 size={16} />
                                                 </button>
-                                                <button className="text-gray-400 hover:text-red-600" onClick={() => setDeleteId(item.id)}>
+                                                <button title="Delete" className="text-gray-400 hover:text-red-600" onClick={() => setDeleteId(item.id)}>
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>

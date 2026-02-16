@@ -1,0 +1,103 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]: TMCP Marketing
+    - button "Global Workspace" [ref=e9] [cursor=pointer]:
+      - generic [ref=e10]: Global Workspace
+      - img [ref=e11]
+    - generic [ref=e13]:
+      - generic [ref=e14]: T
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Test User
+        - paragraph [ref=e17]: test@example.com
+    - navigation [ref=e18]:
+      - link "Dashboard" [ref=e19] [cursor=pointer]:
+        - /url: /
+        - img [ref=e20]
+        - text: Dashboard
+      - link "Worksheets" [ref=e25] [cursor=pointer]:
+        - /url: /worksheets
+        - img [ref=e26]
+        - text: Worksheets
+      - link "Campaigns" [ref=e29] [cursor=pointer]:
+        - /url: /campaigns
+        - img [ref=e30]
+        - text: Campaigns
+      - link "My Brand" [ref=e34] [cursor=pointer]:
+        - /url: /brands
+        - img [ref=e35]
+        - text: My Brand
+      - link "Customers" [ref=e41] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e42]
+        - text: Customers
+      - link "Calendar" [ref=e47] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e48]
+        - text: Calendar
+      - link "Social Posts" [ref=e50] [cursor=pointer]:
+        - /url: /social-posts
+        - img [ref=e51]
+        - text: Social Posts
+    - button "Sign out" [ref=e58] [cursor=pointer]:
+      - img [ref=e59]
+      - text: Sign out
+  - main [ref=e63]:
+    - generic [ref=e64]:
+      - generic [ref=e65]:
+        - heading "Brand Identities" [level=2] [ref=e66]
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - img [ref=e69]
+            - textbox "Search brands..." [ref=e72]
+          - button "New Brand" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e75]: New Brand
+      - generic [ref=e78]:
+        - heading "Brand Alpha" [level=3] [ref=e79]
+        - generic [ref=e80]:
+          - button "Edit" [ref=e81] [cursor=pointer]:
+            - img [ref=e82]
+          - button "Delete" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - heading "Edit Brand" [level=2] [ref=e91]
+        - button [ref=e92] [cursor=pointer]:
+          - img [ref=e93]
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - heading "AI Assistance" [level=4] [ref=e100]
+            - paragraph [ref=e101]: Generate brand identity from scratch
+          - button "Auto-Generate" [ref=e102] [cursor=pointer]:
+            - img [ref=e103]
+            - text: Auto-Generate
+        - generic [ref=e106]:
+          - generic [ref=e107]: Brand Name *
+          - textbox [ref=e108]: Brand Beta
+        - generic [ref=e109]:
+          - generic [ref=e110]: Slogan
+          - textbox [ref=e111]
+        - generic [ref=e112]:
+          - generic [ref=e113]: Mission Statement
+          - textbox [ref=e114]
+        - generic [ref=e115]:
+          - generic [ref=e116]: Voice & Tone
+          - textbox "E.g. Professional, Authoritative, yet Friendly..." [ref=e117]
+        - generic [ref=e118]:
+          - generic [ref=e119]: Logo URL
+          - textbox [ref=e120]
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - generic [ref=e123]: Color Palette (JSON string)
+            - textbox "[\"#FF0000\", \"#00FF00\"]" [ref=e124]: "[]"
+          - generic [ref=e125]:
+            - generic [ref=e126]: Keywords (JSON string)
+            - textbox "[\"innovation\", \"growth\"]" [ref=e127]: "[]"
+      - generic [ref=e129]:
+        - button "Cancel" [ref=e130] [cursor=pointer]
+        - button "Save" [active] [ref=e131] [cursor=pointer]
+```

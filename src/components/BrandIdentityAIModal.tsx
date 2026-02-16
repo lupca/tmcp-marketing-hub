@@ -90,7 +90,7 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
         onClose();
     };
 
-    const showResult = streaming || streamContent;
+    const showResult = streaming || streamContent || error;
 
     return (
         <Modal

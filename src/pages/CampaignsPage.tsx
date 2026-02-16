@@ -227,10 +227,10 @@ export default function CampaignsPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex justify-end gap-2">
-                                                    <button className="text-gray-400 hover:text-blue-600" onClick={() => openEdit(item)}>
+                                                    <button title="Edit" className="text-gray-400 hover:text-blue-600" onClick={() => openEdit(item)}>
                                                         <Edit2 size={16} />
                                                     </button>
-                                                    <button className="text-gray-400 hover:text-red-600" onClick={() => setDeleteId(item.id)}>
+                                                    <button title="Delete" className="text-gray-400 hover:text-red-600" onClick={() => setDeleteId(item.id)}>
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </div>

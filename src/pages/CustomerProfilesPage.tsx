@@ -178,10 +178,10 @@ export default function CustomerProfilesPage() {
                                             <h3 className="font-bold text-lg text-gray-900 line-clamp-1">{item.persona_name}</h3>
                                         </div>
                                         <div className="flex gap-1">
-                                            <button className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50" onClick={() => openEdit(item)}>
+                                            <button title="Edit" className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50" onClick={() => openEdit(item)}>
                                                 <Edit2 size={16} />
                                             </button>
-                                            <button className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50" onClick={() => setDeleteId(item.id)}>
+                                            <button title="Delete" className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50" onClick={() => setDeleteId(item.id)}>
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>

@@ -27,7 +27,7 @@ export function renderMarkdown(md) {
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br/>');
     // Wrap <li> groups in <ul>
-    html = html.replace(/((?:<li>.*?<\/li><br\/>?)+)/g, '<ul>$1</ul>');
+    html = html.replace(/((?:<li>.*?<\/li>(?:<br\/>)*)+)/g, '<ul>$1</ul>');
     html = html.replace(/<ul>(.*?)<\/ul>/gs, (_, inner) => '<ul>' + inner.replace(/<br\/>/g, '') + '</ul>');
     return '<p>' + html + '</p>';
 }

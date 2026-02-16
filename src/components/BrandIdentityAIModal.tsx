@@ -1,24 +1,32 @@
 import { useState, useRef } from 'react';
+// @ts-ignore
 import { generateBrandIdentity } from '../lib/brandIdentityApi';
 import Modal from './Modal';
 import { Sparkles, Loader, AlertCircle, Bot, CheckCircle2 } from 'lucide-react';
+import { Worksheet } from '../models/schema';
 
-const STATUS_MESSAGES = {
+const STATUS_MESSAGES: Record<string, string> = {
     fetching_worksheet: '📋 Fetching worksheet via MCP...',
     analyzing: '🧠 Analyzing brand essence...',
     thinking: '✨ Generating brand identity...',
 };
 
-export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }) {
+interface BrandIdentityAIModalProps {
+    worksheets: Worksheet[];
+    onClose: () => void;
+    onComplete: (data: any) => void;
+}
+
+export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }: BrandIdentityAIModalProps) {
     const [worksheetId, setWorksheetId] = useState('');
     const [language, setLanguage] = useState('Vietnamese');
     const [streaming, setStreaming] = useState(false);
     const [streamContent, setStreamContent] = useState('');
-    const [status, setStatus] = useState(null);
-    const [error, setError] = useState(null);
+    const [status, setStatus] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const [done, setDone] = useState(false);
-    const [brandData, setBrandData] = useState(null);
-    const abortRef = useRef(null);
+    const [brandData, setBrandData] = useState<any>(null);
+    const abortRef = useRef<AbortController | null>(null);
 
     const handleGenerate = async () => {
         if (!worksheetId) return;
@@ -36,7 +44,7 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
         try {
             await generateBrandIdentity(
                 { worksheetId, language },
-                (event) => {
+                (event: any) => {
                     switch (event.type) {
                         case 'status':
                             setStatus(event.status);
@@ -60,7 +68,7 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
                 },
                 controller.signal,
             );
-        } catch (e) {
+        } catch (e: any) {
             if (e.name !== 'AbortError') {
                 setError(e.message);
             }
@@ -83,20 +91,19 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
     };
 
     const showResult = streaming || streamContent;
-    const selectedWorksheet = worksheets.find(w => w.id === worksheetId);
 
     return (
         <Modal
             title="✨ Generate Brand Identity with AI"
             onClose={handleCancel}
             footer={
-                <>
-                    <button className="btn btn-secondary" onClick={handleCancel}>
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleCancel}>
                         Cancel
                     </button>
                     {!showResult && (
                         <button
-                            className="btn btn-ai"
+                            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-all ${!worksheetId || streaming ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
                             onClick={handleGenerate}
                             disabled={!worksheetId || streaming}
                         >
@@ -105,20 +112,20 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
                         </button>
                     )}
                     {done && brandData && (
-                        <button className="btn btn-primary" onClick={handleAccept}>
+                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" onClick={handleAccept}>
                             Use This Data
                         </button>
                     )}
-                </>
+                </div>
             }
         >
             {!showResult ? (
                 /* ---- Configuration Form ---- */
-                <div className="ai-modal-form">
-                    <div className="form-group">
-                        <label className="form-label">Worksheet *</label>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Worksheet *</label>
                         <select
-                            className="form-select"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                             value={worksheetId}
                             onChange={e => setWorksheetId(e.target.value)}
                         >
@@ -128,15 +135,15 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
                             ))}
                         </select>
                         {!worksheetId && (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>
+                            <span className="text-xs text-gray-500 mt-1 block">
                                 Choose a worksheet to use as the foundation for your brand identity.
                             </span>
                         )}
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Target Language</label>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Target Language</label>
                         <select
-                            className="form-select"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                             value={language}
                             onChange={e => setLanguage(e.target.value)}
                         >
@@ -147,13 +154,13 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
                 </div>
             ) : (
                 /* ---- Streaming Result ---- */
-                <div className="ai-modal-result">
+                <div className="space-y-4">
                     {/* Status */}
                     {status && (
-                        <div className="ai-status">
-                            <Loader size={16} className="ai-spin" />
-                            <span>
-                                <Bot size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                        <div className="flex items-center gap-2 text-purple-600 bg-purple-50 px-3 py-2 rounded-md">
+                            <Loader size={16} className="animate-spin" />
+                            <span className="text-sm font-medium">
+                                <Bot size={14} className="inline mr-1" />
                                 {STATUS_MESSAGES[status] || 'Processing...'}
                             </span>
                         </div>
@@ -161,40 +168,39 @@ export default function BrandIdentityAIModal({ worksheets, onClose, onComplete }
 
                     {/* Streamed content */}
                     {streamContent && (
-                        <div className="ai-stream-content">
-                            <pre className="ai-stream-pre">{streamContent}</pre>
+                        <div className="bg-gray-50 rounded-md p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
+                            <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono">{streamContent}</pre>
                         </div>
                     )}
 
                     {/* Skeleton while no content yet */}
                     {!streamContent && !error && (
-                        <div className="ai-skeleton">
-                            <div className="skeleton-line w80" />
-                            <div className="skeleton-line w60" />
-                            <div className="skeleton-line w90" />
-                            <div className="skeleton-line w40" />
+                        <div className="space-y-2 animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
                         </div>
                     )}
 
                     {/* Error */}
                     {error && (
-                        <div className="ai-error">
+                        <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md">
                             <AlertCircle size={16} />
-                            <span>{error}</span>
+                            <span className="text-sm">{error}</span>
                         </div>
                     )}
 
                     {/* Done + Preview */}
                     {done && brandData && !error && (
-                        <div className="ai-done-msg">
-                            <CheckCircle2 size={16} style={{ color: 'var(--success)' }} />
-                            <span>Brand identity generated! Click "Use This Data" to auto-fill the form.</span>
-                            <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                {brandData.colorPalette?.map((c, i) => (
-                                    <div key={i} style={{
-                                        width: 28, height: 28, borderRadius: 8,
-                                        background: c, border: '1px solid var(--border)',
-                                    }} title={c} />
+                        <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div className="flex items-center gap-2 text-green-700 font-medium mb-2">
+                                <CheckCircle2 size={16} />
+                                <span>Brand identity generated! Click "Use This Data" to auto-fill the form.</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {brandData.colorPalette?.map((c: string, i: number) => (
+                                    <div key={i} className="w-6 h-6 rounded border border-gray-200 shadow-sm" style={{ backgroundColor: c }} title={c} />
                                 ))}
                             </div>
                         </div>

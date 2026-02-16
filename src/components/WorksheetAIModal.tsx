@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+// @ts-ignore
 import { generateWorksheet } from '../lib/worksheetApi';
 import Modal from './Modal';
 import { Sparkles, Loader, AlertCircle, Bot } from 'lucide-react';
@@ -10,24 +11,29 @@ const FIELDS = [
     { key: 'uniqueSellingProposition', label: 'Unique Selling Proposition (USP)', placeholder: 'What makes you different from competitors?' },
 ];
 
-export default function WorksheetAIModal({ onClose, onComplete }) {
-    const [form, setForm] = useState({
+interface WorksheetAIModalProps {
+    onClose: () => void;
+    onComplete: (data: any) => void;
+}
+
+export default function WorksheetAIModal({ onClose, onComplete }: WorksheetAIModalProps) {
+    const [form, setForm] = useState<any>({
         businessDescription: '',
         targetAudience: '',
         painPoints: '',
         uniqueSellingProposition: '',
         language: 'Vietnamese',
     });
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<any>({});
     const [streaming, setStreaming] = useState(false);
     const [streamContent, setStreamContent] = useState('');
-    const [status, setStatus] = useState(null);
-    const [error, setError] = useState(null);
+    const [status, setStatus] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const [done, setDone] = useState(false);
-    const abortRef = useRef(null);
+    const abortRef = useRef<AbortController | null>(null);
 
     const validate = () => {
-        const errs = {};
+        const errs: any = {};
         FIELDS.forEach(f => {
             if (!form[f.key] || form[f.key].length < 20) {
                 errs[f.key] = 'Minimum 20 characters required';
@@ -50,7 +56,7 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
         abortRef.current = controller;
 
         try {
-            await generateWorksheet(form, (event) => {
+            await generateWorksheet(form, (event: any) => {
                 switch (event.type) {
                     case 'status':
                         setStatus(event.status);
@@ -68,7 +74,7 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
                         break;
                 }
             }, controller.signal);
-        } catch (e) {
+        } catch (e: any) {
             if (e.name !== 'AbortError') {
                 setError(e.message);
             }
@@ -96,33 +102,36 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
             title="✨ Generate Worksheet with AI"
             onClose={handleCancel}
             footer={
-                <>
-                    <button className="btn btn-secondary" onClick={handleCancel}>
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleCancel}>
                         Cancel
                     </button>
                     {!showResult && (
-                        <button className="btn btn-ai" onClick={handleGenerate} disabled={streaming}>
+                        <button
+                            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-all ${streaming ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'}`}
+                            onClick={handleGenerate}
+                            disabled={streaming}
+                        >
                             <Sparkles size={16} />
                             Generate
                         </button>
                     )}
                     {done && streamContent && (
-                        <button className="btn btn-primary" onClick={handleAccept}>
+                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" onClick={handleAccept}>
                             Use This Content
                         </button>
                     )}
-                </>
+                </div>
             }
         >
             {!showResult ? (
                 /* ---- Input Form ---- */
-                <div className="ai-modal-form">
+                <div className="space-y-4">
                     {FIELDS.map(f => (
-                        <div key={f.key} className="form-group">
-                            <label className="form-label">{f.label} *</label>
+                        <div key={f.key}>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{f.label} *</label>
                             <textarea
-                                className={`form-textarea ${errors[f.key] ? 'form-error' : ''}`}
-                                style={{ minHeight: 70 }}
+                                className={`w-full px-3 py-2 border rounded-md focus:ring-orange-500 focus:border-orange-500 min-h-[70px] ${errors[f.key] ? 'border-red-300' : 'border-gray-300'}`}
                                 value={form[f.key]}
                                 onChange={e => {
                                     setForm({ ...form, [f.key]: e.target.value });
@@ -130,13 +139,13 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
                                 }}
                                 placeholder={f.placeholder}
                             />
-                            {errors[f.key] && <span className="ai-field-error">{errors[f.key]}</span>}
+                            {errors[f.key] && <span className="text-xs text-red-500 mt-1">{errors[f.key]}</span>}
                         </div>
                     ))}
-                    <div className="form-group">
-                        <label className="form-label">Language</label>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
                         <select
-                            className="form-select"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
                             value={form.language}
                             onChange={e => setForm({ ...form, language: e.target.value })}
                         >
@@ -147,13 +156,13 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
                 </div>
             ) : (
                 /* ---- Streaming Result ---- */
-                <div className="ai-modal-result">
+                <div className="space-y-4">
                     {/* Status */}
                     {status && (
-                        <div className="ai-status">
-                            <Loader size={16} className="ai-spin" />
-                            <span>
-                                <Bot size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                        <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-3 py-2 rounded-md">
+                            <Loader size={16} className="animate-spin" />
+                            <span className="text-sm font-medium">
+                                <Bot size={14} className="inline mr-1" />
                                 {status === 'thinking' ? 'AI is analyzing your business...' : 'Processing...'}
                             </span>
                         </div>
@@ -161,24 +170,23 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
 
                     {/* Streamed content */}
                     {streamContent && (
-                        <div className="ai-stream-content">
-                            <pre className="ai-stream-pre">{streamContent}</pre>
+                        <div className="bg-gray-50 rounded-md p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
+                            <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono">{streamContent}</pre>
                         </div>
                     )}
 
                     {/* Skeleton while no content yet */}
                     {!streamContent && !error && (
-                        <div className="ai-skeleton">
-                            <div className="skeleton-line w80" />
-                            <div className="skeleton-line w60" />
-                            <div className="skeleton-line w90" />
-                            <div className="skeleton-line w40" />
+                        <div className="space-y-2 animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
                         </div>
                     )}
 
                     {/* Error */}
                     {error && (
-                        <div className="ai-error">
+                        <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md">
                             <AlertCircle size={16} />
                             <span>{error}</span>
                         </div>
@@ -186,7 +194,7 @@ export default function WorksheetAIModal({ onClose, onComplete }) {
 
                     {/* Done indicator */}
                     {done && !error && (
-                        <div className="ai-done-msg">
+                        <div className="text-green-700 font-medium text-sm">
                             ✅ Generation complete! Click "Use This Content" to apply.
                         </div>
                     )}

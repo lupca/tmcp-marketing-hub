@@ -67,4 +67,29 @@ describe('CampaignsPage', () => {
 
         expect(screen.getByText('New Campaign', { selector: 'h2' })).toBeInTheDocument();
     });
+
+    it('filters campaigns based on search input', async () => {
+        const mockItems = [
+            { id: '1', name: 'Alpha Campaign', campaign_type: 'awareness', status: 'planned', kpi_targets: {} },
+            { id: '2', name: 'Beta Campaign', campaign_type: 'awareness', status: 'planned', kpi_targets: {} }
+        ];
+
+        pb.collection('marketing_campaigns').getList.mockResolvedValue({ items: mockItems });
+        pb.collection('worksheets').getFullList.mockResolvedValue([]);
+
+        render(<CampaignsPage />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Alpha Campaign')).toBeInTheDocument();
+            expect(screen.getByText('Beta Campaign')).toBeInTheDocument();
+        });
+
+        const searchInput = screen.getByPlaceholderText('Search campaigns...');
+        fireEvent.change(searchInput, { target: { value: 'Alpha' } });
+
+        await waitFor(() => {
+            expect(screen.getByText('Alpha Campaign')).toBeInTheDocument();
+            expect(screen.queryByText('Beta Campaign')).not.toBeInTheDocument();
+        });
+    });
 });

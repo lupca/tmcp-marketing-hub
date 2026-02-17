@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -67,7 +67,10 @@ export default function CampaignsPage() {
 
     useEffect(() => { load(); }, [currentWorkspace?.id]);
 
-    const filtered = items.filter(i => i.name?.toLowerCase().includes(search.toLowerCase()));
+    const filtered = useMemo(() => {
+        const lowerSearch = search.toLowerCase();
+        return items.filter(i => i.name?.toLowerCase().includes(lowerSearch));
+    }, [items, search]);
 
     const openCreate = () => {
         setForm({

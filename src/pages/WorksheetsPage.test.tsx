@@ -74,4 +74,30 @@ describe('WorksheetsPage', () => {
             }));
         });
     });
+
+    it('filters worksheets based on search input', async () => {
+        const mockItems = [
+            { id: '1', title: 'Worksheet One', created: '2023-01-01', expand: {} },
+            { id: '2', title: 'Worksheet Two', created: '2023-01-01', expand: {} }
+        ];
+
+        pb.collection('worksheets').getList.mockResolvedValue({ items: mockItems, totalItems: 2 });
+        pb.collection('brand_identities').getFullList.mockResolvedValue([]);
+        pb.collection('customer_personas').getFullList.mockResolvedValue([]);
+
+        render(<WorksheetsPage />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Worksheet One')).toBeInTheDocument();
+            expect(screen.getByText('Worksheet Two')).toBeInTheDocument();
+        });
+
+        const searchInput = screen.getByPlaceholderText('Search worksheets...');
+        fireEvent.change(searchInput, { target: { value: 'One' } });
+
+        await waitFor(() => {
+            expect(screen.getByText('Worksheet One')).toBeInTheDocument();
+            expect(screen.queryByText('Worksheet Two')).not.toBeInTheDocument();
+        });
+    });
 });

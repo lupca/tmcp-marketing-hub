@@ -224,45 +224,107 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
     test('Social Posts CRUD', async ({ page }) => {
         await navigateTo(page, 'Social Posts', '/social-posts');
 
-        // Create
-        await page.route('**/api/collections/master_contents/records', async route => {
-            await route.fulfill({ status: 200, body: JSON.stringify({ id: 'm1' }) });
-        });
-        await page.route('**/api/collections/platform_variants/records', async route => {
-            if (route.request().method() === 'POST') {
-                await route.fulfill({ status: 200, body: JSON.stringify({ id: 'pv1', adapted_copy: 'Hello' }) });
+        // Mock campaigns for dropdown
+        await page.route('**/api/collections/marketing_campaigns/records*', async route => {
+            if (route.request().method() === 'GET') {
+                await route.fulfill({
+                    status: 200,
+                    body: JSON.stringify({ items: [{ id: 'c1', name: 'Camp A' }], totalItems: 1 })
+                });
+                return;
             }
+            await route.continue();
         });
-        await page.click('button:has-text("New Post")');
-        await page.fill('textarea', 'Hello');
+
+        // Dynamic list data
+        const masterItems = [{
+            id: 'm1',
+            core_message: 'Hello master content',
+            approval_status: 'pending',
+            campaign_id: 'c1',
+            created: '2023-01-01'
+        }];
+        const variantItems: any[] = [];
+
+        await page.route('**/api/collections/master_contents/records*', async route => {
+            const method = route.request().method();
+            if (method === 'POST') {
+                await route.fulfill({ status: 200, body: JSON.stringify({ id: 'm1' }) });
+                return;
+            }
+            if (method === 'GET') {
+                await route.fulfill({
+                    status: 200,
+                    body: JSON.stringify({ items: masterItems, totalItems: masterItems.length })
+                });
+                return;
+            }
+            await route.continue();
+        });
+
+        await page.route('**/api/collections/platform_variants/records*', async route => {
+            const method = route.request().method();
+            if (method === 'POST') {
+                variantItems.push({
+                    id: 'pv1',
+                    master_content_id: 'm1',
+                    platform: 'facebook',
+                    adapted_copy: 'Hello variant',
+                    publish_status: 'draft',
+                });
+                await route.fulfill({ status: 200, body: JSON.stringify({ id: 'pv1' }) });
+                return;
+            }
+            if (method === 'GET') {
+                await route.fulfill({
+                    status: 200,
+                    body: JSON.stringify({ items: variantItems, totalItems: variantItems.length })
+                });
+                return;
+            }
+            await route.continue();
+        });
+
+        // Create Master Content
+        await page.click('button:has-text("New Content")');
+        await page.fill('div:has(> label:has-text("Core Message")) textarea', 'Hello master content');
+        await page.click('select');
+        await page.selectOption('select', 'c1');
         await page.click('button:has-text("Save")');
 
-        // List
-        await page.route('**/api/collections/platform_variants/records*', async route => {
-            await route.fulfill({
-                status: 200,
-                body: JSON.stringify({ items: [{ id: 'pv1', platform: 'facebook', adapted_copy: 'Hello', publish_status: 'draft' }], totalItems: 1 })
-            });
-        });
-        await page.reload();
+        await expect(page.locator('text=Hello master content')).toBeVisible();
+        await expect(page.locator('text=Camp A')).toBeVisible();
 
-        // Edit
+        // Add Variant
+        await page.click('button:has-text("Add Variant")');
+        await page.fill('div:has(> label:has-text("Adapted Copy")) textarea', 'Hello variant');
+        await page.click('button:has-text("Save")');
+
+        // Show variants
+        await page.click('button:has-text("Show variants")');
+        await expect(page.locator('text=Hello variant')).toBeVisible();
+
+        // Edit variant
         await page.route('**/api/collections/platform_variants/records/pv1', async route => {
             if (route.request().method() === 'PATCH') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ id: 'pv1', adapted_copy: 'Updated' }) });
+                return;
             }
+            await route.continue();
         });
-        await page.click('button[title="Edit"]');
-        await page.fill('textarea', 'Updated');
+        await page.click('button[title="Edit variant"]');
+        await page.fill('div:has(> label:has-text("Adapted Copy")) textarea', 'Updated');
         await page.click('button:has-text("Save")');
 
-        // Delete
+        // Delete variant
         await page.route('**/api/collections/platform_variants/records/pv1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 204 });
+                return;
             }
+            await route.continue();
         });
-        await page.click('button[title="Delete"]');
+        await page.click('button[title="Delete variant"]');
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 

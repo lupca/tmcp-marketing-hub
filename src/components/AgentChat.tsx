@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 // @ts-ignore
 import { sendMessage, checkHealth } from '../lib/chatApi';
 import { MessageSquare, X, Send, Bot, User, ChevronDown, ChevronRight, Wrench, AlertCircle, Loader, Trash2 } from 'lucide-react';
@@ -32,6 +32,95 @@ interface ChatMessage {
     error?: string | null;
     done?: boolean;
 }
+
+// Optimization: Memoized UserMessage to prevent re-renders when input changes
+const UserMessage = memo(({ content }: { content: string }) => (
+    <div className="flex justify-end">
+        <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%] shadow-sm text-sm">
+            {content}
+        </div>
+    </div>
+));
+
+// Optimization: Memoized AgentMessage to prevent re-renders of past messages
+const AgentMessage = memo(({ msg }: { msg: ChatMessage }) => {
+    const [toolsExpanded, setToolsExpanded] = useState(false);
+
+    return (
+        <div className="flex gap-3 max-w-[90%]">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shrink-0 shadow-sm mt-1">
+                <Bot size={16} />
+            </div>
+            <div className="flex flex-col gap-2 min-w-0">
+                <div className="bg-white rounded-2xl rounded-tl-sm p-4 shadow-sm border border-gray-100 text-sm text-gray-800">
+                    {/* Status indicator */}
+                    {msg.status && (
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 text-xs">
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: agentColor(msg.activeAgent || '') }} />
+                            <span className="font-semibold" style={{ color: agentColor(msg.activeAgent || '') }}>{msg.activeAgent}</span>
+                            <span className="text-gray-400">
+                                {msg.status === 'thinking' ? 'is thinking...' : 'is working...'}
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Skeleton while waiting for content */}
+                    {!msg.content && !msg.error && !msg.done && (
+                        <div className="space-y-2 animate-pulse opacity-50">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                    )}
+
+                    {/* Content */}
+                    {msg.content && (
+                        <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                    )}
+
+                    {/* Tool logs */}
+                    {msg.tools && msg.tools.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-gray-100">
+                            <button
+                                className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors w-full"
+                                onClick={() => setToolsExpanded(!toolsExpanded)}
+                            >
+                                {toolsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                <Wrench size={12} />
+                                <span>{msg.tools.length} tool{msg.tools.length > 1 ? 's' : ''} used</span>
+                            </button>
+                            {toolsExpanded && (
+                                <div className="mt-2 space-y-2 pl-2 border-l-2 border-gray-100">
+                                    {msg.tools.map((t, j) => (
+                                        <div key={j} className="text-xs">
+                                            <div className="flex items-center gap-1.5 font-medium text-gray-700">
+                                                {t.loading ? <Loader size={12} className="animate-spin text-blue-500" /> : <div className="text-green-500"><Wrench size={12} /></div>}
+                                                <span>{t.name}</span>
+                                            </div>
+                                            {t.output && (
+                                                <div className="mt-1 bg-gray-50 rounded p-2 font-mono text-[10px] text-gray-600 overflow-x-auto border border-gray-200">
+                                                    {typeof t.output === 'string' ? t.output.slice(0, 300) : JSON.stringify(t.output, null, 2).slice(0, 300)}
+                                                    {((typeof t.output === 'string' ? t.output.length : JSON.stringify(t.output).length) > 300) && '...'}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Error */}
+                    {msg.error && (
+                        <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded flex items-start gap-2">
+                            <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                            <span>{msg.error}</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+});
 
 export default function AgentChat() {
     const [open, setOpen] = useState(false);
@@ -202,11 +291,7 @@ export default function AgentChat() {
 
                         {messages.map((msg, i) => (
                             msg.role === 'user' ? (
-                                <div key={i} className="flex justify-end">
-                                    <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%] shadow-sm text-sm">
-                                        {msg.content}
-                                    </div>
-                                </div>
+                                <UserMessage key={i} content={msg.content} />
                             ) : (
                                 <AgentMessage key={msg.id || i} msg={msg} />
                             )
@@ -249,85 +334,5 @@ export default function AgentChat() {
                 </div>
             )}
         </>
-    );
-}
-
-/* ---- Agent Message Bubble ---- */
-function AgentMessage({ msg }: { msg: ChatMessage }) {
-    const [toolsExpanded, setToolsExpanded] = useState(false);
-
-    return (
-        <div className="flex gap-3 max-w-[90%]">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shrink-0 shadow-sm mt-1">
-                <Bot size={16} />
-            </div>
-            <div className="flex flex-col gap-2 min-w-0">
-                <div className="bg-white rounded-2xl rounded-tl-sm p-4 shadow-sm border border-gray-100 text-sm text-gray-800">
-                    {/* Status indicator */}
-                    {msg.status && (
-                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 text-xs">
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: agentColor(msg.activeAgent || '') }} />
-                            <span className="font-semibold" style={{ color: agentColor(msg.activeAgent || '') }}>{msg.activeAgent}</span>
-                            <span className="text-gray-400">
-                                {msg.status === 'thinking' ? 'is thinking...' : 'is working...'}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Skeleton while waiting for content */}
-                    {!msg.content && !msg.error && !msg.done && (
-                        <div className="space-y-2 animate-pulse opacity-50">
-                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                        </div>
-                    )}
-
-                    {/* Content */}
-                    {msg.content && (
-                        <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
-                    )}
-
-                    {/* Tool logs */}
-                    {msg.tools && msg.tools.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-gray-100">
-                            <button
-                                className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors w-full"
-                                onClick={() => setToolsExpanded(!toolsExpanded)}
-                            >
-                                {toolsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                                <Wrench size={12} />
-                                <span>{msg.tools.length} tool{msg.tools.length > 1 ? 's' : ''} used</span>
-                            </button>
-                            {toolsExpanded && (
-                                <div className="mt-2 space-y-2 pl-2 border-l-2 border-gray-100">
-                                    {msg.tools.map((t, j) => (
-                                        <div key={j} className="text-xs">
-                                            <div className="flex items-center gap-1.5 font-medium text-gray-700">
-                                                {t.loading ? <Loader size={12} className="animate-spin text-blue-500" /> : <div className="text-green-500"><Wrench size={12} /></div>}
-                                                <span>{t.name}</span>
-                                            </div>
-                                            {t.output && (
-                                                <div className="mt-1 bg-gray-50 rounded p-2 font-mono text-[10px] text-gray-600 overflow-x-auto border border-gray-200">
-                                                    {typeof t.output === 'string' ? t.output.slice(0, 300) : JSON.stringify(t.output, null, 2).slice(0, 300)}
-                                                    {((typeof t.output === 'string' ? t.output.length : JSON.stringify(t.output).length) > 300) && '...'}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Error */}
-                    {msg.error && (
-                        <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded flex items-start gap-2">
-                            <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                            <span>{msg.error}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
     );
 }

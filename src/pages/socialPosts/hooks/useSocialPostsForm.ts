@@ -91,6 +91,16 @@ export const useSocialPostsForm = (
             adapted_copy: coreMessage,
             publish_status: 'draft',
             scheduled_at: '',
+            hashtags: '',
+            call_to_action: '',
+            summary: '',
+            character_count: 0,
+            platform_tips: '',
+            confidence_score: 0,
+            optimization_notes: '',
+            seo_title: '',
+            seo_description: '',
+            seo_keywords: '',
         });
         setVariantParentId(masterContentId);
         setVariantEditId(null);
@@ -98,11 +108,31 @@ export const useSocialPostsForm = (
     };
 
     const openEditVariant = (v: PlatformVariant) => {
+        // Parse metadata if it's stored as JSON string
+        let metadata: any = {};
+        if (v.metadata) {
+            try {
+                metadata = typeof v.metadata === 'string' ? JSON.parse(v.metadata) : v.metadata;
+            } catch (e) {
+                console.error('Failed to parse metadata', e);
+            }
+        }
+        
         setVariantForm({
             platform: v.platform || 'facebook',
             adapted_copy: v.adapted_copy || '',
             publish_status: v.publish_status || 'draft',
             scheduled_at: v.scheduled_at ? v.scheduled_at.slice(0, 16) : '',
+            hashtags: metadata.hashtags ? (Array.isArray(metadata.hashtags) ? metadata.hashtags.join(' ') : metadata.hashtags) : '',
+            call_to_action: metadata.call_to_action || '',
+            summary: metadata.summary || '',
+            character_count: metadata.character_count || 0,
+            platform_tips: metadata.platform_tips || '',
+            confidence_score: metadata.confidence_score || 0,
+            optimization_notes: metadata.optimization_notes || '',
+            seo_title: metadata.seo_title || '',
+            seo_description: metadata.seo_description || '',
+            seo_keywords: metadata.seo_keywords ? (Array.isArray(metadata.seo_keywords) ? metadata.seo_keywords.join(', ') : metadata.seo_keywords) : '',
         });
         setVariantEditId(v.id);
         setVariantParentId(v.master_content_id);
@@ -115,6 +145,20 @@ export const useSocialPostsForm = (
             // Convert scheduled_at to ISO string if present
             const scheduledAtISO = convertScheduledAtToISO(variantForm.scheduled_at);
 
+            // Build metadata object from form fields
+            const metadata = {
+                hashtags: variantForm.hashtags || '',
+                call_to_action: variantForm.call_to_action || '',
+                summary: variantForm.summary || '',
+                character_count: variantForm.character_count || 0,
+                platform_tips: variantForm.platform_tips || '',
+                confidence_score: variantForm.confidence_score || 0,
+                optimization_notes: variantForm.optimization_notes || '',
+                seo_title: variantForm.seo_title || '',
+                seo_description: variantForm.seo_description || '',
+                seo_keywords: variantForm.seo_keywords || '',
+            };
+
             const body = {
                 workspace_id: currentWorkspaceId,
                 master_content_id: variantParentId,
@@ -123,6 +167,7 @@ export const useSocialPostsForm = (
                 publish_status: variantForm.publish_status,
                 scheduled_at: scheduledAtISO,
                 platformMediaIds: [],
+                metadata: JSON.stringify(metadata),
             };
 
             if (variantModal === 'edit' && variantEditId) {

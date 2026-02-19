@@ -136,6 +136,7 @@ export default function SocialPostsPage() {
                 <VariantModal
                     form={form}
                     currentWorkspace={currentWorkspace}
+                    masterContentId={form.variantParentId}
                 />
             )}
 

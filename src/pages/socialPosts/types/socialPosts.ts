@@ -11,6 +11,16 @@ export interface VariantForm {
     adapted_copy: string;
     publish_status: string;
     scheduled_at: string;
+    hashtags?: string;
+    call_to_action?: string;
+    summary?: string;
+    character_count?: number;
+    platform_tips?: string;
+    confidence_score?: number;
+    optimization_notes?: string;
+    seo_title?: string;
+    seo_description?: string;
+    seo_keywords?: string;
 }
 
 export interface SocialPostsData {

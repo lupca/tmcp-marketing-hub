@@ -14,6 +14,8 @@ import CampaignsPage from './pages/CampaignsPage';
 import CampaignTasksPage from './pages/CampaignTasksPage';
 import CalendarPage from './pages/CalendarPage';
 import SocialPostsPage from './pages/SocialPostsPage';
+import ProductsServicesPage from './pages/ProductsServicesPage';
+import ContentBriefsPage from './pages/ContentBriefsPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -47,6 +49,8 @@ export default function App() {
                         <Route path="/tasks" element={<ProtectedRoute><CampaignTasksPage /></ProtectedRoute>} />
                         <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
                         <Route path="/social-posts" element={<ProtectedRoute><SocialPostsPage /></ProtectedRoute>} />
+                        <Route path="/products" element={<ProtectedRoute><ProductsServicesPage /></ProtectedRoute>} />
+                        <Route path="/campaigns/:campaignId/briefs" element={<ProtectedRoute><ContentBriefsPage /></ProtectedRoute>} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </BrowserRouter>

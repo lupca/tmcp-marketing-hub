@@ -6,8 +6,8 @@ import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 // @ts-ignore
 import MarketingStrategyAIModal from '../components/MarketingStrategyAIModal';
-import { Plus, Search, Edit2, Trash2, Megaphone, Sparkles, Target } from 'lucide-react';
-import { MarketingCampaign, Worksheet } from '../models/schema';
+import { Plus, Search, Edit2, Trash2, Megaphone, Sparkles, Target, FileText } from 'lucide-react';
+import { MarketingCampaign, Worksheet, ProductService } from '../models/schema';
 
 // Helper to extract strategy from kpi_targets (JSON)
 const getStrategy = (campaign: MarketingCampaign) => {
@@ -21,6 +21,7 @@ export default function CampaignsPage() {
     const { currentWorkspace } = useWorkspace();
     const [items, setItems] = useState<MarketingCampaign[]>([]);
     const [worksheets, setWorksheets] = useState<Worksheet[]>([]);
+    const [products, setProducts] = useState<ProductService[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState<'create' | 'edit' | null>(null);
@@ -29,6 +30,7 @@ export default function CampaignsPage() {
     // Form now includes mapping to JSON storage
     const [form, setForm] = useState({
         worksheetId: '',
+        productId: '',
         name: '',
         goal: '',
         acquisitionStrategy: '',
@@ -49,15 +51,17 @@ export default function CampaignsPage() {
         setLoading(true);
         try {
             const filter = `workspace_id = "${currentWorkspace.id}"`;
-            const [res, wsRes] = await Promise.all([
+            const [res, wsRes, prodRes] = await Promise.all([
                 pb.collection('marketing_campaigns').getList<MarketingCampaign>(1, 200, {
                     filter,
-                    expand: 'worksheetId'
+                    expand: 'worksheetId,product_id'
                 }),
                 pb.collection('worksheets').getFullList<Worksheet>({ filter }),
+                pb.collection('products_services').getFullList<ProductService>({ filter }),
             ]);
             setItems(res.items);
             setWorksheets(wsRes);
+            setProducts(prodRes);
         } catch (e: any) {
             toast.show(e.message, 'error');
         } finally {
@@ -72,6 +76,7 @@ export default function CampaignsPage() {
     const openCreate = () => {
         setForm({
             worksheetId: '',
+            productId: '',
             name: '',
             goal: '',
             acquisitionStrategy: '',
@@ -90,6 +95,7 @@ export default function CampaignsPage() {
         const strategy = getStrategy(item);
         setForm({
             worksheetId: item.worksheet_id || '',
+            productId: item.product_id || '',
             name: item.name || '',
             goal: strategy.goal || '',
             acquisitionStrategy: strategy.acquisitionStrategy || '',
@@ -121,6 +127,7 @@ export default function CampaignsPage() {
             const body = {
                 workspace_id: currentWorkspace.id,
                 worksheet_id: form.worksheetId,
+                product_id: form.productId || null,
                 name: form.name,
                 campaign_type: form.campaign_type,
                 status: form.status,
@@ -157,6 +164,10 @@ export default function CampaignsPage() {
     // Helper to safety get expanded worksheet title
     const getWorksheetTitle = (item: any) => {
         return item.expand?.worksheet_id?.title || item.expand?.worksheetId?.title || '—';
+    };
+
+    const getProductName = (item: any) => {
+        return item.expand?.product_id?.name || '—';
     };
 
     return (
@@ -197,6 +208,7 @@ export default function CampaignsPage() {
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Worksheet</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Goal</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Actions</th>
@@ -214,6 +226,9 @@ export default function CampaignsPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {getWorksheetTitle(item)}
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {getProductName(item)}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.status === 'active' ? 'bg-green-100 text-green-800' :
                                                     item.status === 'completed' ? 'bg-blue-100 text-blue-800' :
@@ -227,6 +242,9 @@ export default function CampaignsPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex justify-end gap-2">
+                                                    <a title="Content Briefs" className="text-gray-400 hover:text-purple-600" href={`/campaigns/${item.id}/briefs`}>
+                                                        <FileText size={16} />
+                                                    </a>
                                                     <button title="Edit" className="text-gray-400 hover:text-blue-600" onClick={() => openEdit(item)}>
                                                         <Edit2 size={16} />
                                                     </button>
@@ -294,6 +312,16 @@ export default function CampaignsPage() {
                                     {worksheets.map(w => <option key={w.id} value={w.id}>{w.title}</option>)}
                                 </select>
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value={form.productId} onChange={e => setForm({ ...form, productId: e.target.value })}>
+                                    <option value="">Select product...</option>
+                                    {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                                 <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value={form.campaign_type} onChange={e => setForm({ ...form, campaign_type: e.target.value })}>

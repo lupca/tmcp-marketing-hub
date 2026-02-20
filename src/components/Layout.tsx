@@ -11,7 +11,8 @@ import {
     LayoutDashboard,
     Menu,
     X,
-    ChevronDown
+    ChevronDown,
+    Package
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -35,6 +36,7 @@ export default function Layout({ children }: LayoutProps) {
         { name: 'Customers', href: '/customers', icon: Users },
         { name: 'Calendar', href: '/calendar', icon: CalendarIcon },
         { name: 'Social Posts', href: '/social-posts', icon: Share2 },
+        { name: 'Products', href: '/products', icon: Package },
     ];
 
     const handleWorkspaceSelect = (id: string) => {

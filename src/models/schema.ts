@@ -84,6 +84,7 @@ export interface Worksheet extends BaseModel {
 export interface MarketingCampaign extends BaseModel {
     workspace_id: string;
     worksheet_id?: string; // Relation to worksheets
+    product_id?: string; // Relation to products_services
     name: string;
     campaign_type?: 'awareness' | 'conversion' | 'retargeting' | 'newsletter' | 'social_series';
     status: 'planned' | 'active' | 'paused' | 'completed' | 'cancelled';
@@ -91,6 +92,29 @@ export interface MarketingCampaign extends BaseModel {
     kpi_targets?: any; // JSON
     start_date?: string; // Date
     end_date?: string; // Date
+}
+
+export interface ProductService extends BaseModel {
+    workspace_id: string;
+    brand_id: string; // Relation to brand_identities
+    name: string;
+    description?: string;
+    usp?: string;
+    key_features?: any; // JSON
+    key_benefits?: any; // JSON
+    default_offer?: string;
+}
+
+export interface ContentBrief extends BaseModel {
+    workspace_id: string;
+    campaign_id: string; // Relation to marketing_campaigns
+    angle_name: string;
+    funnel_stage: 'Awareness' | 'Consideration' | 'Conversion' | 'Retention';
+    psychological_angle: 'Fear' | 'Emotion' | 'Logic' | 'Social Proof' | 'Urgency' | 'Curiosity';
+    pain_point_focus?: string;
+    key_message_variation?: string;
+    call_to_action_direction?: string;
+    brief?: string;
 }
 
 export interface MasterContent extends BaseModel {
@@ -207,4 +231,6 @@ export interface TypedPocketBase extends PocketBase {
     collection(idOrName: 'social_interactions'): RecordService<SocialInteraction>;
     collection(idOrName: 'leads'): RecordService<Lead>;
     collection(idOrName: 'users'): RecordService<User>;
+    collection(idOrName: 'products_services'): RecordService<ProductService>;
+    collection(idOrName: 'content_briefs'): RecordService<ContentBrief>;
 }

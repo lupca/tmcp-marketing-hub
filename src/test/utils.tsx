@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, renderHook, RenderOptions, RenderHookOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../contexts/AuthContext';
 import { WorkspaceProvider } from '../contexts/WorkspaceContext';
@@ -25,5 +25,10 @@ const customRender = (
     options?: Omit<RenderOptions, 'wrapper'>,
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
+const customRenderHook = <Result, Props>(
+    render: (initialProps: Props) => Result,
+    options?: Omit<RenderHookOptions<Props>, 'wrapper'>,
+) => renderHook(render, { wrapper: AllTheProviders, ...options });
+
 export * from '@testing-library/react';
-export { customRender as render };
+export { customRender as render, customRenderHook as renderHook };

@@ -7,10 +7,12 @@ interface Toast {
     id: number;
     message: string;
     type: ToastType;
+    actionText?: string;
+    onAction?: () => void;
 }
 
 interface ToastContextType {
-    show: (message: string, type?: ToastType) => void;
+    show: (message: string, type?: ToastType, options?: { actionText?: string; onAction?: () => void; durationMs?: number }) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -26,10 +28,11 @@ export function useToast() {
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const show = useCallback((message: string, type: ToastType = 'success') => {
+    const show = useCallback((message: string, type: ToastType = 'success', options?: { actionText?: string; onAction?: () => void; durationMs?: number }) => {
         const id = Date.now();
-        setToasts(prev => [...prev, { id, message, type }]);
-        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+        setToasts(prev => [...prev, { id, message, type, actionText: options?.actionText, onAction: options?.onAction }]);
+        const duration = options?.durationMs ?? 3500;
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
     }, []);
 
     const icons = {
@@ -52,6 +55,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     <div key={t.id} className={`${bgColors[t.type]} rounded shadow-md p-4 flex items-center gap-3 min-w-[300px] animate-slide-in`}>
                         {icons[t.type]}
                         <span className="text-sm font-medium text-gray-800">{t.message}</span>
+                        {t.actionText && t.onAction && (
+                            <button
+                                className="ml-auto text-xs font-semibold text-blue-600 hover:text-blue-700"
+                                onClick={() => t.onAction?.()}
+                            >
+                                {t.actionText}
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

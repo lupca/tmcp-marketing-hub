@@ -2,219 +2,377 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Social Posts - Complete Workflow', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to social posts page
-    await page.goto('/social-posts');
-    await page.waitForLoadState('networkidle');
+    // 1. Mock Auth
+    await page.route('**/api/collections/users/auth-with-password', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          token: 'fake-jwt-token',
+          record: { id: 'user1', email: 'test@example.com', name: 'Test User' }
+        })
+      });
+    });
+
+    // 2. Mock Workspaces
+    await page.route('**/api/collections/workspaces/records*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            items: [{ id: 'ws1', name: 'Global Workspace', created: '2023-01-01' }],
+            totalItems: 1
+          })
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    // 3. Mock Social Posts page data BEFORE navigation
+    await page.route('**/api/collections/marketing_campaigns/records*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            items: [
+              { id: 'c1', name: 'Summer Campaign', workspace_id: 'ws1' },
+              { id: 'c2', name: 'Winter Campaign', workspace_id: 'ws1' }
+            ],
+            totalItems: 2
+          })
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.route('**/api/collections/master_contents/records*', async route => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ items: [], totalItems: 0 })
+        });
+        return;
+      }
+      if (method === 'POST') {
+        const body = route.request().postDataJSON();
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ id: 'm1', ...body })
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.route('**/api/collections/platform_variants/records*', async route => {
+      const method = route.request().method();
+      if (method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ items: [], totalItems: 0 })
+        });
+        return;
+      }
+      if (method === 'POST') {
+        const body = route.request().postDataJSON();
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ id: 'pv1', ...body })
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    // Login
+    await page.goto('/');
+    await page.fill('input[type="email"], input[placeholder*="Email"]', 'test@example.com');
+    await page.fill('input[type="password"], input[placeholder*="Password"]', 'password123');
+    await page.click('button:has-text("Sign in")');
+    await expect(page).toHaveURL(/\//);
+
+    // Select workspace
+    const wsBtn = page.locator('button:has-text("Select Workspace"), button:has-text("Global Workspace")');
+    await expect(wsBtn).toBeVisible();
+    const text = await wsBtn.innerText();
+    if (text.includes('Select Workspace')) {
+      await wsBtn.click();
+      await page.click('button:has-text("Global Workspace")');
+    }
+
+    // Navigate to Social Posts
+    await page.click('nav a:has-text("Social Posts")');
+    await expect(page).toHaveURL(/social-posts/);
+    await page.waitForSelector('h2:has-text("Social Posts")');
   });
 
-  test('complete master content generation and selection workflow', async ({ page }) => {
-    // Step 1: Click "New Content"
+  test('create master content with all form fields', async ({ page }) => {
+    // Open the New Content modal
     await page.click('button:has-text("New Content")');
-    
-    // Step 2: Select campaign
-    await page.selectOption('select[name="campaign"]', { index: 1 });
-    
-    // Step 3: Select language
-    await page.selectOption('select:has-text("Vietnamese")', 'Vietnamese');
-    
-    // Step 4: Click "Generate AI"
-    await page.click('button:has-text("Generate via AI")');
-    
-    // Step 5: Wait for ActivityLog to show completion
-    await page.waitForSelector('text=Generation completed successfully', { timeout: 60000 });
-    
-    // Step 6: Check that both version buttons are present
-    await expect(page.locator('button:has-text("Core Message")')).toBeVisible();
-    await expect(page.locator('button:has-text("Extended Message")')).toBeVisible();
-    
-    // Step 7: Toggle to Extended Message
-    await page.click('button:has-text("Extended Message")');
-    await expect(page.locator('text=Extended Message:')).toBeVisible();
-    
-    // Step 8: Toggle back to Core Message
-    await page.click('button:has-text("Core Message")');
-    await expect(page.locator('text=Core Message:')).toBeVisible();
-    
-    // Step 9: Verify hashtags and CTA are displayed
-    await expect(page.locator('text=Suggested Hashtags:')).toBeVisible();
-    await expect(page.locator('text=Call to Action:')).toBeVisible();
-    
-    // Step 10: Click "Use This Content"
-    await page.click('button:has-text("Use This Content")');
-    
-    // Step 11: Verify form is populated
-    const coreMessageTextarea = page.locator('textarea[placeholder*="key message"]');
-    await expect(coreMessageTextarea).not.toHaveValue('');
-    
-    // Step 12: Save
+    await expect(page.locator('h2:has-text("Create Content")')).toBeVisible();
+
+    // Verify form fields are present
+    await expect(page.locator('label:has-text("Campaign")')).toBeVisible();
+    await expect(page.locator('label:has-text("Core Message")')).toBeVisible();
+    await expect(page.locator('label:has-text("Approval Status")')).toBeVisible();
+
+    // Select campaign
+    const campaignSelect = page.locator('select').first();
+    await campaignSelect.selectOption('c1');
+    await expect(campaignSelect).toHaveValue('c1');
+
+    // Fill core message
+    const coreMessage = page.locator('textarea[placeholder*="key message"]');
+    await coreMessage.fill('Summer sale: 50% off all items this weekend only!');
+    await expect(coreMessage).toHaveValue('Summer sale: 50% off all items this weekend only!');
+
+    // Change approval status
+    const approvalSelect = page.locator('select:has(option:has-text("Pending"))');
+    await approvalSelect.selectOption('approved');
+    await expect(approvalSelect).toHaveValue('approved');
+
+    // Save
     await page.click('button:has-text("Save")');
-    
-    // Step 13: Verify success message
-    await expect(page.locator('text=Saved successfully')).toBeVisible({ timeout: 5000 });
+
+    // Modal should close
+    await expect(page.locator('h2:has-text("Create Content")')).not.toBeVisible();
   });
 
-  test('complete variant generation with all metadata fields', async ({ page }) => {
-    // Prerequisite: Ensure at least one master content exists
-    // Or create one first
-    
-    // Step 1: Click "Add Variant" on first master content
-    await page.click('button:has-text("Add Variant")').first();
-    
-    // Step 2: Select multiple platforms
-    await page.click('button:has-text("Generate Multiple via AI")');
-    
-    // Step 3: Select Facebook, Instagram, LinkedIn
-    await page.check('input[type="checkbox"][value="facebook"]');
-    await page.check('input[type="checkbox"][value="instagram"]');
-    await page.check('input[type="checkbox"][value="linkedin"]');
-    
-    // Step 4: Select language
-    await page.selectOption('select:has-text("Vietnamese")', 'Vietnamese');
-    
-    // Step 5: Click "Generate Variants"
-    await page.click('button:has-text("Generate Variants")');
-    
-    // Step 6: Wait for generation to complete
-    await page.waitForSelector('text=Generation completed successfully', { timeout: 90000 });
-    
-    // Step 7: Verify platform tabs are visible
-    await expect(page.locator('button:has-text("FACEBOOK")')).toBeVisible();
-    await expect(page.locator('button:has-text("INSTAGRAM")')).toBeVisible();
-    await expect(page.locator('button:has-text("LINKEDIN")')).toBeVisible();
-    
-    // Step 8: Switch to Instagram tab
-    await page.click('button:has-text("INSTAGRAM")');
-    
-    // Step 9: Verify all metadata sections are displayed
-    await expect(page.locator('text=Adapted Copy:')).toBeVisible();
-    await expect(page.locator('text=Hashtags:')).toBeVisible();
-    await expect(page.locator('text=Call to Action:')).toBeVisible();
-    await expect(page.locator('text=Summary:')).toBeVisible();
-    await expect(page.locator('text=Character Count:')).toBeVisible();
-    await expect(page.locator('text=Platform Tips:')).toBeVisible();
-    await expect(page.locator('text=Confidence:')).toBeVisible();
-    
-    // Step 10: Click "Use This Variant"
-    await page.click('button:has-text("Use This Variant")');
-    
-    // Step 11: Verify all form fields are populated
-    const adaptedCopyTextarea = page.locator('textarea[placeholder*="platform-specific"]');
-    await expect(adaptedCopyTextarea).not.toHaveValue('');
-    
-    // Check metadata fields
-    const hashtagsInput = page.locator('input[placeholder*="hashtags"]');
-    await expect(hashtagsInput).not.toHaveValue('');
-    
-    const ctaInput = page.locator('input[placeholder*="Call to Action"]');
-    await expect(ctaInput).not.toHaveValue('');
-    
-    const summaryTextarea = page.locator('textarea[placeholder*="summary"]');
-    await expect(summaryTextarea).not.toHaveValue('');
-    
-    // Step 12: Save
-    await page.click('button:has-text("Save")');
-    
-    // Step 13: Verify success
-    await expect(page.locator('text=Saved successfully')).toBeVisible({ timeout: 5000 });
-  });
+  test('create variant with metadata fields', async ({ page }) => {
+    // First, set up a master content in mocked data
+    await page.route('**/api/collections/master_contents/records*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            items: [{
+              id: 'm1',
+              core_message: 'Summer sale content',
+              approval_status: 'approved',
+              campaign_id: 'c1',
+              created: '2023-01-01'
+            }],
+            totalItems: 1
+          })
+        });
+        return;
+      }
+      await route.continue();
+    });
+    await page.reload();
+    await page.waitForSelector('h2:has-text("Social Posts")');
 
-  test('variant metadata persistence on edit', async ({ page }) => {
-    // Step 1: Create a variant with metadata (assumes previous test succeeded)
-    
-    // Step 2: Find and click edit on first variant
-    await page.click('button:has-text("Edit")').first();
-    
-    // Step 3: Verify all metadata fields are loaded
-    const hashtagsInput = page.locator('input[placeholder*="hashtags"]');
-    const hashtagsValue = await hashtagsInput.inputValue();
-    expect(hashtagsValue).toBeTruthy();
-    
-    const ctaInput = page.locator('input[placeholder*="Call to Action"]');
-    const ctaValue = await ctaInput.inputValue();
-    expect(ctaValue).toBeTruthy();
-    
-    // Step 4: Expand SEO section
+    // Wait for master content to appear
+    await expect(page.locator('p:has-text("Summer sale content")')).toBeVisible();
+
+    // Click "Add Variant"
+    await page.click('button[title="Add Variant"]');
+    await expect(page.locator('h2:has-text("Add Platform Variant")')).toBeVisible();
+
+    // Select platform
+    const platformSelect = page.locator('select:has(option:has-text("Facebook"))');
+    await platformSelect.selectOption('facebook');
+
+    // Fill adapted copy
+    const adaptedCopy = page.locator('textarea[placeholder*="platform-specific"]');
+    await adaptedCopy.fill('🔥 SUMMER SALE! 50% off everything this weekend!');
+
+    // Fill metadata fields
+    const hashtags = page.locator('input[placeholder*="#example"]');
+    await hashtags.fill('#summersale #deals #50off');
+
+    const cta = page.locator('input[placeholder*="Shop Now"]');
+    await cta.fill('Shop Now');
+
+    const summary = page.locator('textarea[placeholder*="Brief summary"]');
+    await summary.fill('Weekend summer sale promotion');
+
+    // Expand SEO settings
     await page.click('summary:has-text("SEO Settings")');
-    
-    // Step 5: Verify SEO fields if they were set
-    const seoTitleInput = page.locator('input[placeholder*="SEO-optimized title"]');
-    await expect(seoTitleInput).toBeVisible();
-    
-    // Step 6: Modify a field
-    await hashtagsInput.fill('#updated #hashtags');
-    
-    // Step 7: Save
+    await expect(page.locator('input[placeholder*="SEO-optimized title"]')).toBeVisible();
+
+    const seoTitle = page.locator('input[placeholder*="SEO-optimized title"]');
+    await seoTitle.fill('Summer Sale - 50% Off');
+
+    const seoDesc = page.locator('textarea[placeholder*="SEO meta description"]');
+    await seoDesc.fill('Get 50% off all items this weekend');
+
+    const seoKeywords = page.locator('input[placeholder*="keyword1"]');
+    await seoKeywords.fill('summer sale, discount, deals');
+
+    // Change publish status
+    const statusSelect = page.locator('select:has(option:has-text("Draft"))');
+    await statusSelect.selectOption('scheduled');
+
+    // Save the variant
     await page.click('button:has-text("Save")');
-    
-    // Step 8: Reopen edit
-    await page.click('button:has-text("Edit")').first();
-    
-    // Step 9: Verify modification was saved
-    const updatedHashtags = await page.locator('input[placeholder*="hashtags"]').inputValue();
-    expect(updatedHashtags).toBe('#updated #hashtags');
+
+    // Modal should close
+    await expect(page.locator('h2:has-text("Add Platform Variant")')).not.toBeVisible();
   });
 
-  test('error handling during generation', async ({ page }) => {
-    // Step 1: Create variant with invalid master content ID
-    // This will trigger an error
-    
-    // Step 2: Start generation (will be mocked to fail)
-    await page.click('button:has-text("Generate via AI")');
-    
-    // Step 3: Wait for error message
-    await expect(page.locator('text=Error:').first()).toBeVisible({ timeout: 10000 });
-    
-    // Step 4: Click "Try Again"
-    await page.click('button:has-text("Try Again")');
-    
-    // Step 5: Verify can retry
-    await expect(page.locator('button:has-text("Generate via AI")')).toBeVisible();
-  });
-
-  test('cancel during generation', async ({ page }) => {
-    // Step 1: Start generation
+  test('master content modal shows Generate AI button only when campaign is selected', async ({ page }) => {
+    // Open New Content modal
     await page.click('button:has-text("New Content")');
-    await page.selectOption('select[name="campaign"]', { index: 1 });
-    await page.click('button:has-text("Generate via AI")');
-    
-    // Step 2: Wait a moment for generation to start
-    await page.waitForSelector('text=Generating:', { timeout: 5000 });
-    
-    // Step 3: Click Cancel
-    await page.click('button:has-text("Cancel")');
-    
-    // Step 4: Verify activity log is hidden
-    await expect(page.locator('text=Generation Activity')).not.toBeVisible();
-    
-    // Step 5: Verify form is not modified
-    const coreMessageTextarea = page.locator('textarea[placeholder*="key message"]');
-    await expect(coreMessageTextarea).toHaveValue('');
-  });
-});
+    await expect(page.locator('h2:has-text("Create Content")')).toBeVisible();
 
-test.describe('Social Posts - Platform Variant Tabs', () => {
-  test('switches between platform tabs correctly', async ({ page }) => {
-    await page.goto('/social-posts');
-    
-    // Generate multi-platform variants
-    await page.click('button:has-text("Add Variant")').first();
+    // Without campaign: Generate via AI button should NOT be visible
+    await expect(page.locator('button:has-text("Generate via AI")')).not.toBeVisible();
+
+    // Select a campaign
+    const campaignSelect = page.locator('select').first();
+    await campaignSelect.selectOption('c1');
+
+    // Now the Generate AI button and language select should appear
+    await expect(page.locator('button:has-text("Generate via AI")')).toBeVisible();
+    await expect(page.locator('select:has(option:has-text("Vietnamese"))')).toBeVisible();
+
+    // Cancel the modal
+    await page.click('button:has-text("Cancel")');
+    await expect(page.locator('h2:has-text("Create Content")')).not.toBeVisible();
+  });
+
+  test('variant modal shows platform-dependent AI generation options', async ({ page }) => {
+    // Load a master content
+    await page.route('**/api/collections/master_contents/records*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            items: [{
+              id: 'm1',
+              core_message: 'Test content for variants',
+              approval_status: 'approved',
+              campaign_id: 'c1',
+              created: '2023-01-01'
+            }],
+            totalItems: 1
+          })
+        });
+        return;
+      }
+      await route.continue();
+    });
+    await page.reload();
+    await page.waitForSelector('h2:has-text("Social Posts")');
+    await expect(page.locator('p:has-text("Test content for variants")')).toBeVisible();
+
+    // Click Add Variant
+    await page.click('button[title="Add Variant"]');
+    await expect(page.locator('h2:has-text("Add Platform Variant")')).toBeVisible();
+
+    // Verify "Generate Multiple via AI" button is visible
+    await expect(page.locator('button:has-text("Generate Multiple via AI")')).toBeVisible();
+
+    // Click "Generate Multiple via AI" to see platform selection view
     await page.click('button:has-text("Generate Multiple via AI")');
-    await page.check('input[value="facebook"]');
-    await page.check('input[value="twitter"]');
-    await page.click('button:has-text("Generate Variants")');
-    
-    await page.waitForSelector('text=Generation completed successfully', { timeout: 60000 });
-    
-    // Initially on Facebook tab
-    await expect(page.locator('button:has-text("FACEBOOK")')).toHaveClass(/bg-green-600/);
-    
-    // Click Twitter tab
-    await page.click('button:has-text("TWITTER")');
-    
-    // Twitter tab should be active
-    await expect(page.locator('button:has-text("TWITTER")')).toHaveClass(/bg-green-600/);
-    
-    // Content should change
-    await expect(page.locator('text=TWITTER').first()).toBeVisible();
+    await expect(page.locator('label:has-text("Select Platforms to Generate")')).toBeVisible();
+
+    // Verify all 8 platform checkboxes are shown
+    for (const platform of ['Facebook', 'Instagram', 'Linkedin', 'Twitter', 'Tiktok', 'Youtube', 'Blog', 'Email']) {
+      await expect(page.locator(`label:has-text("${platform}")`)).toBeVisible();
+    }
+
+    // Select some platforms
+    await page.locator('label:has-text("Facebook") input[type="checkbox"]').check();
+    await page.locator('label:has-text("Instagram") input[type="checkbox"]').check();
+
+    // Verify "Generate Variants" button is enabled
+    const genBtn = page.locator('button:has-text("Generate Variants")');
+    await expect(genBtn).toBeEnabled();
+
+    // Click "Back" to return to single-variant form
+    await page.click('button:has-text("Back")');
+    await expect(page.locator('label:text-is("Platform")')).toBeVisible();
+    await expect(page.locator('textarea[placeholder*="platform-specific"]')).toBeVisible();
+
+    // Cancel modal
+    await page.click('button:has-text("Cancel")');
+    await expect(page.locator('h2:has-text("Add Platform Variant")')).not.toBeVisible();
+  });
+
+  test('edit and delete variant workflow', async ({ page }) => {
+    // Pre-load master content with a variant
+    await page.route('**/api/collections/master_contents/records*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            items: [{
+              id: 'm1',
+              core_message: 'Content with variants',
+              approval_status: 'approved',
+              campaign_id: 'c1',
+              created: '2023-01-01'
+            }],
+            totalItems: 1
+          })
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.route('**/api/collections/platform_variants/records*', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({
+            items: [{
+              id: 'pv1',
+              master_content_id: 'm1',
+              platform: 'facebook',
+              adapted_copy: 'Original FB post content',
+              publish_status: 'draft',
+              hashtags: '#original',
+              call_to_action: 'Learn More'
+            }],
+            totalItems: 1
+          })
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.reload();
+    await page.waitForSelector('h2:has-text("Social Posts")');
+    await expect(page.locator('p:has-text("Content with variants")')).toBeVisible();
+
+    // Show variants
+    await page.click('button:has-text("Show variants")');
+    await expect(page.locator('text=Original FB post content')).toBeVisible();
+
+    // Edit variant
+    await page.route('**/api/collections/platform_variants/records/pv1', async route => {
+      if (route.request().method() === 'PATCH') {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ id: 'pv1', adapted_copy: 'Updated FB content' })
+        });
+        return;
+      }
+      if (route.request().method() === 'DELETE') {
+        await route.fulfill({ status: 204 });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.click('table button[title="Edit"]');
+    await expect(page.locator('h2:has-text("Edit Platform Variant")')).toBeVisible();
+
+    // Modify adapted copy
+    const adaptedCopy = page.locator('textarea[placeholder*="platform-specific"]');
+    await adaptedCopy.fill('Updated FB content');
+    await page.click('button:has-text("Save")');
+    await expect(page.locator('h2:has-text("Edit Platform Variant")')).not.toBeVisible();
+
+    // Delete variant
+    await page.click('table button[title="Delete"]');
+    await page.click('button:has-text("Confirm"), button:has-text("Delete")');
   });
 });

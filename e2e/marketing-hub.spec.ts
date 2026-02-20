@@ -79,16 +79,21 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
         await page.route('**/api/collections/worksheets/records/w1', async route => {
             if (route.request().method() === 'PATCH') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ id: 'w1', title: 'Updated' }) });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Edit"]');
         await page.fill('div:has(> label:has-text("Title")) input', 'Updated');
         await page.click('button:has-text("Save")');
+        await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
 
         // Delete
         await page.route('**/api/collections/worksheets/records/w1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 204 });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Delete"]');
@@ -121,16 +126,21 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
         await page.route('**/api/collections/brand_identities/records/b1', async route => {
             if (route.request().method() === 'PATCH') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ id: 'b1', brand_name: 'Brand Beta' }) });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Edit"]');
         await page.fill('div:has(> label:has-text("Brand Name")) input', 'Brand Beta');
         await page.click('button:has-text("Save")');
+        await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
 
         // Delete
         await page.route('**/api/collections/brand_identities/records/b1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 204 });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Delete"]');
@@ -163,16 +173,21 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
         await page.route('**/api/collections/customer_personas/records/p1', async route => {
             if (route.request().method() === 'PATCH') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ id: 'p1', persona_name: 'Persona B' }) });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Edit"]');
         await page.fill('div:has(> label:has-text("Persona Name")) input', 'Persona B');
         await page.click('button:has-text("Save")');
+        await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
 
         // Delete
         await page.route('**/api/collections/customer_personas/records/p1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 204 });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Delete"]');
@@ -205,16 +220,21 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
         await page.route('**/api/collections/marketing_campaigns/records/c1', async route => {
             if (route.request().method() === 'PATCH') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ id: 'c1', name: 'Camp B' }) });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Edit"]');
         await page.fill('div:has(> label:has-text("Campaign Name")) input', 'Camp B');
         await page.click('button:has-text("Save")');
+        await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
 
         // Delete
         await page.route('**/api/collections/marketing_campaigns/records/c1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 204 });
+            } else {
+                await route.fallback();
             }
         });
         await page.click('button[title="Delete"]');
@@ -222,8 +242,6 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
     });
 
     test('Social Posts CRUD', async ({ page }) => {
-        await navigateTo(page, 'Social Posts', '/social-posts');
-
         // Mock campaigns for dropdown
         await page.route('**/api/collections/marketing_campaigns/records*', async route => {
             if (route.request().method() === 'GET') {
@@ -285,19 +303,22 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
             await route.continue();
         });
 
+        await navigateTo(page, 'Social Posts', '/social-posts');
+        await page.waitForURL('**/social-posts');
+        await page.waitForSelector('h2:has-text("Social Posts")');
+
         // Create Master Content
         await page.click('button:has-text("New Content")');
-        await page.fill('div:has(> label:has-text("Core Message")) textarea', 'Hello master content');
-        await page.click('select');
-        await page.selectOption('select', 'c1');
+        await page.fill('textarea[placeholder*="key message"]', 'Hello master content');
+        await page.selectOption('select:has(option:has-text("Camp A"))', 'c1');
         await page.click('button:has-text("Save")');
 
-        await expect(page.locator('text=Hello master content')).toBeVisible();
-        await expect(page.locator('text=Camp A')).toBeVisible();
+        await expect(page.locator('p:has-text("Hello master content")')).toBeVisible();
+        await expect(page.locator('span:has-text("Camp A")')).toBeVisible();
 
         // Add Variant
         await page.click('button:has-text("Add Variant")');
-        await page.fill('div:has(> label:has-text("Adapted Copy")) textarea', 'Hello variant');
+        await page.fill('textarea[placeholder*="platform-specific"]', 'Hello variant');
         await page.click('button:has-text("Save")');
 
         // Show variants
@@ -312,9 +333,10 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
             }
             await route.continue();
         });
-        await page.click('button[title="Edit variant"]');
-        await page.fill('div:has(> label:has-text("Adapted Copy")) textarea', 'Updated');
+        await page.click('table button[title="Edit"]');
+        await page.fill('textarea[placeholder*="platform-specific"]', 'Updated');
         await page.click('button:has-text("Save")');
+        await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
 
         // Delete variant
         await page.route('**/api/collections/platform_variants/records/pv1', async route => {
@@ -324,7 +346,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
             }
             await route.continue();
         });
-        await page.click('button[title="Delete variant"]');
+        await page.click('table button[title="Delete"]');
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 

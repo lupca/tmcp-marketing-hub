@@ -8,9 +8,10 @@ interface SocialPostsHeaderProps {
   sortBy: string;
   setSortBy: (v: string) => void;
   onCreate: () => void;
+  onBatchGenerate: () => void;
 }
 
-const SocialPostsHeader: React.FC<SocialPostsHeaderProps> = ({ search, setSearch, sortBy, setSortBy, onCreate }) => {
+const SocialPostsHeader: React.FC<SocialPostsHeaderProps> = ({ search, setSearch, sortBy, setSortBy, onCreate, onBatchGenerate }) => {
   const [showSortMenu, setShowSortMenu] = useState(false);
   return (
     <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -61,6 +62,12 @@ const SocialPostsHeader: React.FC<SocialPostsHeaderProps> = ({ search, setSearch
           onClick={onCreate}
         >
           <Plus size={18} /> <span className="hidden sm:inline">New Content</span>
+        </button>
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 whitespace-nowrap"
+          onClick={onBatchGenerate}
+        >
+          <Plus size={18} /> <span className="hidden sm:inline">Batch Generate</span>
         </button>
       </div>
     </div>

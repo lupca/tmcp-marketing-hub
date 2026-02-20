@@ -12,6 +12,7 @@ import SocialPostsHeader from '../components/social-posts/SocialPostsHeader';
 import SocialPostCard from '../components/social-posts/SocialPostCard';
 import MasterContentModal from '../components/social-posts/MasterContentModal';
 import VariantModal from '../components/social-posts/VariantModal';
+import BatchGenerateModal from '../components/social-posts/BatchGenerateModal';
 
 
 
@@ -21,6 +22,7 @@ export default function SocialPostsPage() {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('newest');
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+    const [showBatchModal, setShowBatchModal] = useState(false);
 
     // Load data
     const { data, loading, reload } = useSocialPosts(currentWorkspace?.id);
@@ -92,6 +94,7 @@ export default function SocialPostsPage() {
                     sortBy={sortBy}
                     setSortBy={setSortBy}
                     onCreate={form.openCreateMc}
+                    onBatchGenerate={() => setShowBatchModal(true)}
                 />
 
                 {/* Body */}
@@ -137,6 +140,28 @@ export default function SocialPostsPage() {
                     form={form}
                     currentWorkspace={currentWorkspace}
                     masterContentId={form.variantParentId}
+                />
+            )}
+
+            {/* Batch Generate Modal */}
+            {showBatchModal && currentWorkspace && (
+                <BatchGenerateModal
+                    campaigns={campaigns}
+                    currentWorkspace={currentWorkspace}
+                    onClose={() => setShowBatchModal(false)}
+                    onComplete={({ mastersCount, variantsCount }) => {
+                        toast.show(
+                            `Created ${mastersCount} master post(s) and ${variantsCount} variant(s).`,
+                            'success',
+                            {
+                                actionText: 'Reload',
+                                onAction: () => reload(),
+                                durationMs: 8000,
+                            }
+                        );
+                        reload();
+                        setShowBatchModal(false);
+                    }}
                 />
             )}
 

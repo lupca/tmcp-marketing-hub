@@ -90,6 +90,72 @@ describe('useAIContentGeneration - SSE Streaming', () => {
     });
   });
 
+  it('starts batch generating posts with correct payload', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: {
+        getReader: () => ({
+          read: vi.fn().mockResolvedValue({ done: true, value: undefined }),
+        }),
+      },
+    });
+    global.fetch = mockFetch;
+
+    const { result } = renderHook(() => useAIContentGeneration());
+
+    await act(async () => {
+      await result.current.startBatchGeneratingPosts(
+        'camp-123',
+        ['facebook', 'instagram'],
+        3,
+        'workspace-456',
+        'English'
+      );
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/batch-generate-posts'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campaignId: 'camp-123',
+          workspaceId: 'workspace-456',
+          language: 'English',
+          platforms: ['facebook', 'instagram'],
+          numMasters: 3,
+        }),
+      })
+    );
+  });
+
+  it('handles TypeError (network interruption) gracefully by emitting a warn event', async () => {
+    const mockFetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+    global.fetch = mockFetch;
+
+    const { result } = renderHook(() => useAIContentGeneration());
+
+    await act(async () => {
+      await result.current.startBatchGeneratingPosts(
+        'camp-123',
+        ['facebook'],
+        1,
+        'workspace-456',
+        'Vietnamese'
+      );
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.error).toBeNull();
+    expect(result.current.events).toHaveLength(1);
+    expect(result.current.events[0]).toEqual({
+      type: 'warn',
+      message: 'Connection interrupted. Generation continues on server.',
+    });
+  });
+
   it('handles error events', async () => {
     const mockReader = {
       read: vi.fn()

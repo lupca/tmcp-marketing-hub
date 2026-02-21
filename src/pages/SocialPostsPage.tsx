@@ -13,6 +13,7 @@ import SocialPostCard from '../components/social-posts/SocialPostCard';
 import MasterContentModal from '../components/social-posts/MasterContentModal';
 import VariantModal from '../components/social-posts/VariantModal';
 import BatchGenerateModal from '../components/social-posts/BatchGenerateModal';
+import { PlatformVariant } from '../models/schema';
 
 
 
@@ -87,7 +88,7 @@ export default function SocialPostsPage() {
     // Render
     return (
         <>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="glass-panel rounded-xl">
                 <SocialPostsHeader
                     search={search}
                     setSearch={setSearch}
@@ -103,10 +104,10 @@ export default function SocialPostsPage() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                     </div>
                 ) : filteredMasters.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-12 text-center text-gray-500">
-                        <Share2 size={48} className="mb-4 text-gray-300" />
-                        <h3 className="text-lg font-medium text-gray-900">No content yet</h3>
-                        <p className="mt-1">Create your first content piece and adapt it for different platforms.</p>
+                    <div className="flex flex-col items-center justify-center p-16 text-center text-gray-400">
+                        <Share2 size={48} className="mb-4 text-gray-500" />
+                        <h3 className="text-lg font-medium text-gray-200">No content yet</h3>
+                        <p className="mt-1 text-gray-400">Create your first content piece and adapt it for different platforms.</p>
                     </div>
                 ) : (
                     <div className="p-6 space-y-4">
@@ -139,7 +140,7 @@ export default function SocialPostsPage() {
                 <VariantModal
                     form={form}
                     currentWorkspace={currentWorkspace}
-                    masterContentId={form.variantParentId}
+                    masterContentId={form.variantParentId || undefined}
                 />
             )}
 

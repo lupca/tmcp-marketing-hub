@@ -133,13 +133,13 @@ export default function CalendarPage() {
     return (
         <>
             <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-                <div className="flex items-center gap-3 bg-white p-2 rounded-lg shadow-sm border border-gray-200">
-                    <button className="p-1 hover:bg-gray-100 rounded-full" onClick={prevMonth}><ChevronLeft size={20} className="text-gray-600" /></button>
-                    <h2 className="text-lg font-bold min-w-[160px] text-center text-gray-800">{monthStr}</h2>
-                    <button className="p-1 hover:bg-gray-100 rounded-full" onClick={nextMonth}><ChevronRight size={20} className="text-gray-600" /></button>
-                    <button className="ml-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors" onClick={goToday}>Today</button>
+                <div className="flex items-center gap-3 glass-panel p-2 rounded-xl border border-glass-border">
+                    <button className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" onClick={prevMonth}><ChevronLeft size={20} className="text-gray-400 hover:text-white transition-colors" /></button>
+                    <h2 className="text-lg font-bold min-w-[160px] text-center text-white text-glow tracking-wide">{monthStr}</h2>
+                    <button className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" onClick={nextMonth}><ChevronRight size={20} className="text-gray-400 hover:text-white transition-colors" /></button>
+                    <button className="ml-2 px-3 py-1.5 text-sm bg-black/20 hover:bg-white/10 text-gray-300 rounded-lg transition-colors border border-glass-border font-medium" onClick={goToday}>Today</button>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm" onClick={() => openCreate()}>
+                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600/80 text-white rounded-lg hover:bg-blue-500 shadow-lg transition-colors" onClick={() => openCreate()}>
                     <Plus size={18} /> <span className="font-medium">Add Event</span>
                 </button>
             </div>
@@ -150,27 +150,27 @@ export default function CalendarPage() {
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <div className="grid grid-cols-7 gap-px bg-glass-border border border-glass-border rounded-xl overflow-hidden shadow-lg glass-panel">
                         {dayNames.map(d => (
-                            <div key={d} className="bg-gray-50 p-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <div key={d} className="bg-black/40 p-3 text-center text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                                 {d}
                             </div>
                         ))}
                         {cells.map((cell, i) => (
                             <div
                                 key={i}
-                                className={`min-h-[100px] bg-white p-2 transition-colors ${cell.other ? 'bg-gray-50 text-gray-400' : 'hover:bg-blue-50 cursor-pointer'
-                                    } ${cell.isToday ? 'bg-blue-50 ring-1 ring-inset ring-blue-200' : ''}`}
+                                className={`min-h-[120px] p-2 transition-colors ${cell.other ? 'bg-black/20 text-gray-500' : 'bg-black/40 hover:bg-white/5 cursor-pointer text-gray-300'
+                                    } ${cell.isToday ? 'ring-1 ring-inset ring-blue-500/50 bg-blue-500/5' : ''}`}
                                 onClick={() => cell.date && !cell.other && openCreate(cell.date)}
                             >
-                                <div className={`text-sm font-medium mb-1 ${cell.isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+                                <div className={`text-sm font-bold mb-2 ${cell.isToday ? 'text-blue-400' : ''}`}>
                                     {cell.day}
                                 </div>
-                                <div className="space-y-1">
+                                <div className="space-y-1.5 flex flex-col items-start w-full">
                                     {cell.date && getEventsForDate(cell.date).map(ev => (
                                         <div
                                             key={ev.id}
-                                            className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded border border-purple-200 truncate cursor-pointer hover:bg-purple-200 shadow-sm transition-all"
+                                            className="px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded-md border border-purple-500/30 truncate cursor-pointer hover:bg-purple-500/30 shadow-sm transition-all w-full text-left"
                                             onClick={e => { e.stopPropagation(); openEdit(ev); }}
                                             title={ev.title}
                                         >
@@ -183,43 +183,43 @@ export default function CalendarPage() {
                     </div>
 
                     {/* Events List */}
-                    <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
-                            <CalendarDays size={18} className="text-gray-500" />
-                            <h3 className="font-semibold text-gray-800">Upcoming Events</h3>
+                    <div className="mt-8 glass-panel rounded-xl overflow-hidden glass-card shadow-lg">
+                        <div className="p-5 border-b border-glass-border bg-black/20 flex items-center gap-3">
+                            <CalendarDays size={20} className="text-blue-400" />
+                            <h3 className="font-bold text-white tracking-wide">Upcoming Events</h3>
                         </div>
 
                         {events.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500">
+                            <div className="flex flex-col items-center justify-center p-12 text-center text-gray-400">
                                 <p>No events found. Click on a date to add one.</p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
+                                    <thead className="bg-white/5 border-b border-glass-border/50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left font-medium text-gray-500">Event</th>
-                                            <th className="px-6 py-3 text-left font-medium text-gray-500">Date</th>
-                                            <th className="px-6 py-3 text-left font-medium text-gray-500">Description</th>
-                                            <th className="px-6 py-3 text-right font-medium text-gray-500">Actions</th>
+                                            <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase tracking-wider text-[11px]">Event</th>
+                                            <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase tracking-wider text-[11px]">Date</th>
+                                            <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase tracking-wider text-[11px]">Description</th>
+                                            <th className="px-6 py-4 text-right font-bold text-gray-400 uppercase tracking-wider text-[11px]">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y divide-glass-border/50">
                                         {events.map(item => (
-                                            <tr key={item.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-3 font-medium text-gray-900">{item.title}</td>
-                                                <td className="px-6 py-3 text-gray-500">
+                                            <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                                                <td className="px-6 py-4 font-medium text-gray-200 group-hover:text-blue-400 transition-colors">{item.title}</td>
+                                                <td className="px-6 py-4 text-gray-400">
                                                     {item.event_date ? new Date(item.event_date).toLocaleDateString() : '—'}
                                                 </td>
-                                                <td className="px-6 py-3 text-gray-500 max-w-xs truncate" title={item.description}>
+                                                <td className="px-6 py-4 text-gray-400 max-w-xs truncate" title={item.description}>
                                                     {item.description || '—'}
                                                 </td>
-                                                <td className="px-6 py-3 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <button className="text-gray-400 hover:text-blue-600" onClick={() => openEdit(item)}>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors" onClick={() => openEdit(item)}>
                                                             <Edit2 size={16} />
                                                         </button>
-                                                        <button className="text-gray-400 hover:text-red-600" onClick={() => setDeleteId(item.id)}>
+                                                        <button className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors" onClick={() => setDeleteId(item.id)}>
                                                             <Trash2 size={16} />
                                                         </button>
                                                     </div>
@@ -239,31 +239,31 @@ export default function CalendarPage() {
                     title={modal === 'edit' ? 'Edit Event' : 'New Calendar Event'}
                     onClose={() => setModal(null)}
                     footer={
-                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={() => setModal(null)}>Cancel</button>
-                            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" onClick={handleSave}>Save</button>
+                        <div className="flex justify-end gap-3 pt-5 border-t border-glass-border">
+                            <button className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors" onClick={() => setModal(null)}>Cancel</button>
+                            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600/80 rounded-lg hover:bg-blue-500 transition-colors shadow-lg" onClick={handleSave}>Save</button>
                         </div>
                     }
                 >
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
-                            <input className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} autoFocus />
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Event Title *</label>
+                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} autoFocus />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                            <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value={form.event_date} onChange={e => setForm({ ...form, event_date: e.target.value })} />
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Date</label>
+                            <input type="date" className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [color-scheme:dark]" value={form.event_date} onChange={e => setForm({ ...form, event_date: e.target.value })} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description / Notes</label>
-                            <textarea className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 h-24" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Add details or AI content suggestions..." />
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Description / Notes</label>
+                            <textarea className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 h-24 text-white custom-scrollbar transition-colors placeholder-gray-500" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Add details or AI content suggestions..." />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Source URL (optional)</label>
-                            <input className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value={form.source_url} onChange={e => setForm({ ...form, source_url: e.target.value })} placeholder="https://..." />
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Source URL (optional)</label>
+                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.source_url} onChange={e => setForm({ ...form, source_url: e.target.value })} placeholder="https://..." />
                         </div>
                     </div>
                 </Modal>

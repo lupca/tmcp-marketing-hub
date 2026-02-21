@@ -4,6 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .glass-panel {
+    @apply bg-glass border border-glass-border backdrop-blur-xl;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .glass-card {
+    @apply bg-glass hover:bg-glass-hover border border-glass-border backdrop-blur-lg transition-all duration-300;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-button {
+    @apply bg-glass hover:bg-glass-hover border border-glass-border backdrop-blur-md transition-all duration-300 text-white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-input {
+    @apply bg-black/20 border border-glass-border focus:border-primary focus:ring-1 focus:ring-primary backdrop-blur-md text-white placeholder-gray-400 transition-all;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+}
+
 
 :root {
   /* Brand Colors */

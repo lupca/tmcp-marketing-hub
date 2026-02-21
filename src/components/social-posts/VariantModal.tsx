@@ -91,13 +91,13 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
       footer={
         <div className="flex justify-end gap-3">
           <button 
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" 
+            className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors" 
             onClick={() => form.setVariantModal(null)}
           >
             Cancel
           </button>
           <button 
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" 
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600/80 rounded-lg hover:bg-blue-500 shadow-lg transition-colors" 
             onClick={() => form.handleSaveVariant(currentWorkspace.id)}
           >
             Save
@@ -111,9 +111,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             <ActivityLog events={events} isLoading={isLoading} />
             
             {generatedContent && !isLoading && (
-              <div className="bg-green-50 border border-green-200 rounded-md p-4 space-y-3">
+              <div className="glass-panel border-blue-500/30 rounded-md p-4 space-y-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-green-800 mb-3">Generated Variants Preview</h4>
+                  <h4 className="text-sm font-semibold text-blue-300 mb-3">Generated Variants Preview</h4>
                   
                   {/* Platform Tabs */}
                   {generatedContent.variants && generatedContent.variants.length > 0 && (
@@ -124,8 +124,8 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                             key={idx}
                             className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
                               selectedVariantIndex === idx
-                                ? 'bg-green-600 text-white'
-                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                ? 'bg-blue-600/80 text-white'
+                                : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
                             }`}
                             onClick={() => setSelectedVariantIndex(idx)}
                           >
@@ -136,23 +136,23 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                       
                       {/* Selected Variant Details */}
                       {generatedContent.variants[selectedVariantIndex] && (
-                        <div className="bg-white p-4 rounded border border-green-100 text-sm text-gray-700 max-h-96 overflow-y-auto space-y-3">
+                        <div className="bg-black/20 p-4 rounded-xl border border-glass-border text-sm text-gray-300 max-h-96 overflow-y-auto space-y-3">
                           <div>
-                            <p className="font-medium text-green-700 mb-2">
+                            <p className="font-medium text-blue-400 mb-2">
                               {generatedContent.variants[selectedVariantIndex].platform?.toUpperCase()}
                             </p>
                           </div>
                           
                           <div>
-                            <p className="font-semibold text-gray-600 mb-1">Adapted Copy:</p>
-                            <p className="whitespace-pre-wrap bg-gray-50 p-2 rounded">
+                            <p className="font-semibold text-gray-400 mb-1">Adapted Copy:</p>
+                            <p className="whitespace-pre-wrap bg-white/5 p-2 rounded">
                               {generatedContent.variants[selectedVariantIndex].adaptedCopy}
                             </p>
                           </div>
                           
                           {generatedContent.variants[selectedVariantIndex].hashtags && (
                             <div>
-                              <p className="font-semibold text-gray-600 mb-1">Hashtags:</p>
+                              <p className="font-semibold text-gray-400 mb-1">Hashtags:</p>
                               <p className="text-blue-600">
                                 {Array.isArray(generatedContent.variants[selectedVariantIndex].hashtags)
                                   ? generatedContent.variants[selectedVariantIndex].hashtags.join(' ')
@@ -163,8 +163,8 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                           
                           {generatedContent.variants[selectedVariantIndex].callToAction && (
                             <div>
-                              <p className="font-semibold text-gray-600 mb-1">Call to Action:</p>
-                              <p className="text-purple-700">
+                              <p className="font-semibold text-gray-400 mb-1">Call to Action:</p>
+                              <p className="text-purple-400">
                                 {generatedContent.variants[selectedVariantIndex].callToAction}
                               </p>
                             </div>
@@ -172,8 +172,8 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                           
                           {generatedContent.variants[selectedVariantIndex].summary && (
                             <div>
-                              <p className="font-semibold text-gray-600 mb-1">Summary:</p>
-                              <p className="text-gray-600">
+                              <p className="font-semibold text-gray-400 mb-1">Summary:</p>
+                              <p className="text-gray-400">
                                 {generatedContent.variants[selectedVariantIndex].summary}
                               </p>
                             </div>
@@ -181,8 +181,8 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                           
                           {generatedContent.variants[selectedVariantIndex].characterCount && (
                             <div>
-                              <p className="font-semibold text-gray-600 mb-1">Character Count:</p>
-                              <p className="text-gray-600">
+                              <p className="font-semibold text-gray-400 mb-1">Character Count:</p>
+                              <p className="text-gray-400">
                                 {generatedContent.variants[selectedVariantIndex].characterCount}
                               </p>
                             </div>
@@ -190,15 +190,15 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                           
                           {generatedContent.variants[selectedVariantIndex].platformTips && (
                             <div>
-                              <p className="font-semibold text-gray-600 mb-1">Platform Tips:</p>
-                              <p className="text-gray-600 italic">
+                              <p className="font-semibold text-gray-400 mb-1">Platform Tips:</p>
+                              <p className="text-gray-400 italic">
                                 {generatedContent.variants[selectedVariantIndex].platformTips}
                               </p>
                             </div>
                           )}
                           
                           {generatedContent.variants[selectedVariantIndex].confidenceScore && (
-                            <div className="pt-2 border-t border-gray-200">
+                            <div className="pt-2 border-t border-glass-border">
                               <p className="text-xs text-gray-500">
                                 Confidence: {generatedContent.variants[selectedVariantIndex].confidenceScore}/5.0
                               </p>
@@ -211,13 +211,13 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                 </div>
                 <div className="flex gap-2">
                   <button
-                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600/80 rounded-md hover:bg-blue-500"
                     onClick={handleUseGeneratedContent}
                   >
                     Use This Variant
                   </button>
                   <button
-                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
                     onClick={() => {
                       reset();
                       setShowActivityLog(false);
@@ -231,10 +231,10 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             )}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-sm text-red-800"><strong>Error:</strong> {error}</p>
+              <div className="bg-red-900/40 border border-red-500/30 backdrop-blur-sm rounded-md p-4">
+                <p className="text-sm text-red-200"><strong>Error:</strong> {error}</p>
                 <button
-                  className="mt-3 px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50"
+                  className="mt-3 px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
                   onClick={() => {
                     reset();
                     setShowActivityLog(false);
@@ -248,10 +248,10 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
         ) : showPlatformSelection && isCreatingNew ? (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Select Platforms to Generate</label>
+              <label className="block text-sm font-medium text-gray-300 mb-3">Select Platforms to Generate</label>
               <div className="grid grid-cols-2 gap-3">
                 {allPlatforms.map(platform => (
-                  <label key={platform} className="flex items-center gap-2 p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50">
+                  <label key={platform} className="flex items-center gap-2 p-3 border border-glass-border rounded-lg bg-black/20 cursor-pointer hover:bg-white/5 transition-colors">
                     <input
                       type="checkbox"
                       checked={selectedPlatforms.includes(platform)}
@@ -265,9 +265,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Language</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                 value={selectedLanguage}
                 onChange={e => setSelectedLanguage(e.target.value)}
               >
@@ -287,7 +287,7 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                 {isLoading ? 'Generating...' : '✨ Generate Variants'}
               </button>
               <button
-                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
                 onClick={() => setShowPlatformSelection(false)}
               >
                 Back
@@ -297,9 +297,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
         ) : (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Platform</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                 value={form.variantForm.platform}
                 onChange={e => form.setVariantForm({ ...form.variantForm, platform: e.target.value })}
               >
@@ -318,7 +318,7 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             {isCreatingNew && (
               <div>
                 <button
-                  className="w-full px-4 py-2 text-sm font-medium text-purple-700 border border-purple-300 rounded-md hover:bg-purple-50 flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2 text-sm font-medium text-purple-400 border border-purple-500/30 rounded-md hover:bg-purple-500/20 text-purple-300 flex items-center justify-center gap-2"
                   onClick={() => setShowPlatformSelection(true)}
                 >
                   <span>✨</span> Generate Multiple via AI
@@ -328,10 +328,10 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Adapted Copy</label>
+                <label className="block text-sm font-medium text-gray-300">Adapted Copy</label>
                 {(form.variantForm.platform || isEditingExisting) && (
                   <button
-                    className="text-sm px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center gap-2"
+                    className="text-sm px-3 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg hover:bg-purple-500/30 transition-colors flex items-center gap-2"
                     onClick={handleGenerateAI}
                     disabled={isLoading}
                   >
@@ -342,7 +342,7 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
               <div className="space-y-2">
                 {(form.variantForm.platform || isEditingExisting) && (
                   <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800 text-sm"
                     value={selectedLanguage}
                     onChange={e => setSelectedLanguage(e.target.value)}
                   >
@@ -353,7 +353,7 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                   </select>
                 )}
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 h-40"
+                  className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800 h-40"
                   value={form.variantForm.adapted_copy}
                   onChange={e => form.setVariantForm({ ...form.variantForm, adapted_copy: e.target.value })}
                   placeholder="Write the platform-specific content here..."
@@ -365,16 +365,16 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             </div>
 
             {/* Metadata Section */}
-            <div className="border-t border-gray-200 pt-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Metadata</h3>
+            <div className="border-t border-glass-border pt-4">
+              <h3 className="text-sm font-semibold text-white mb-3">Metadata</h3>
               
               <div className="space-y-3">
                 {/* Hashtags */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Hashtags</label>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">Hashtags</label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                     value={form.variantForm.hashtags || ''}
                     onChange={e => form.setVariantForm({ ...form.variantForm, hashtags: e.target.value })}
                     placeholder="#example #hashtags"
@@ -383,10 +383,10 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
 
                 {/* Call to Action */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Call to Action</label>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">Call to Action</label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                     value={form.variantForm.call_to_action || ''}
                     onChange={e => form.setVariantForm({ ...form.variantForm, call_to_action: e.target.value })}
                     placeholder="e.g., Shop Now, Learn More"
@@ -395,9 +395,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
 
                 {/* Summary */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Summary</label>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">Summary</label>
                   <textarea
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 h-20"
+                    className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800 h-20"
                     value={form.variantForm.summary || ''}
                     onChange={e => form.setVariantForm({ ...form.variantForm, summary: e.target.value })}
                     placeholder="Brief summary of the content..."
@@ -407,23 +407,23 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                 {/* Character Count & Confidence Score */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Character Count</label>
+                    <label className="block text-xs font-medium text-gray-300 mb-1">Character Count</label>
                     <input
                       type="number"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                       value={form.variantForm.character_count || 0}
                       onChange={e => form.setVariantForm({ ...form.variantForm, character_count: parseInt(e.target.value) || 0 })}
                       readOnly
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Confidence Score</label>
+                    <label className="block text-xs font-medium text-gray-300 mb-1">Confidence Score</label>
                     <input
                       type="number"
                       step="0.1"
                       min="0"
                       max="5"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                       value={form.variantForm.confidence_score || 0}
                       onChange={e => form.setVariantForm({ ...form.variantForm, confidence_score: parseFloat(e.target.value) || 0 })}
                       readOnly
@@ -433,9 +433,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
 
                 {/* Platform Tips */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Platform Tips</label>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">Platform Tips</label>
                   <textarea
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 h-16"
+                    className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800 h-16"
                     value={form.variantForm.platform_tips || ''}
                     onChange={e => form.setVariantForm({ ...form.variantForm, platform_tips: e.target.value })}
                     placeholder="Platform-specific posting tips..."
@@ -444,9 +444,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
 
                 {/* Optimization Notes */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Optimization Notes</label>
+                  <label className="block text-xs font-medium text-gray-300 mb-1">Optimization Notes</label>
                   <textarea
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 h-16"
+                    className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800 h-16"
                     value={form.variantForm.optimization_notes || ''}
                     onChange={e => form.setVariantForm({ ...form.variantForm, optimization_notes: e.target.value })}
                     placeholder="Notes about optimizations applied..."
@@ -454,16 +454,16 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                 </div>
 
                 {/* SEO Fields - Collapsible */}
-                <details className="border border-gray-200 rounded-md">
-                  <summary className="px-3 py-2 text-xs font-medium text-gray-700 cursor-pointer hover:bg-gray-50">
+                <details className="border border-glass-border rounded-md">
+                  <summary className="px-3 py-2 text-xs font-medium text-gray-300 cursor-pointer hover:bg-white/5">
                     SEO Settings (Optional)
                   </summary>
-                  <div className="px-3 pb-3 pt-2 space-y-3 bg-gray-50">
+                  <div className="px-3 pb-3 pt-2 space-y-3 bg-white/5">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">SEO Title</label>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">SEO Title</label>
                       <input
                         type="text"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                         value={form.variantForm.seo_title || ''}
                         onChange={e => form.setVariantForm({ ...form.variantForm, seo_title: e.target.value })}
                         placeholder="SEO-optimized title (max 60 chars)"
@@ -471,9 +471,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">SEO Description</label>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">SEO Description</label>
                       <textarea
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 h-16"
+                        className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800 h-16"
                         value={form.variantForm.seo_description || ''}
                         onChange={e => form.setVariantForm({ ...form.variantForm, seo_description: e.target.value })}
                         placeholder="SEO meta description (max 160 chars)"
@@ -481,10 +481,10 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">SEO Keywords</label>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">SEO Keywords</label>
                       <input
                         type="text"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                         value={form.variantForm.seo_keywords || ''}
                         onChange={e => form.setVariantForm({ ...form.variantForm, seo_keywords: e.target.value })}
                         placeholder="keyword1, keyword2, keyword3"
@@ -496,9 +496,9 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Publish Status</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Publish Status</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                 value={form.variantForm.publish_status}
                 onChange={e => form.setVariantForm({ ...form.variantForm, publish_status: e.target.value })}
               >
@@ -510,10 +510,10 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Date & Time</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Scheduled Date & Time</label>
               <input
                 type="datetime-local"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors [&>option]:bg-gray-800"
                 value={form.variantForm.scheduled_at}
                 onChange={e => form.setVariantForm({ ...form.variantForm, scheduled_at: e.target.value })}
               />

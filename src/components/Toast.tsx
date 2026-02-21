@@ -42,9 +42,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const bgColors = {
-        success: 'bg-white border-l-4 border-green-500',
-        error: 'bg-white border-l-4 border-red-500',
-        info: 'bg-white border-l-4 border-blue-500'
+        success: 'glass-panel border-l-4 border-l-green-500 border-t-glass-border border-r-glass-border border-b-glass-border',
+        error: 'glass-panel border-l-4 border-l-red-500 border-t-glass-border border-r-glass-border border-b-glass-border',
+        info: 'glass-panel border-l-4 border-l-blue-500 border-t-glass-border border-r-glass-border border-b-glass-border'
     };
 
     return (
@@ -52,9 +52,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             {children}
             <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
                 {toasts.map(t => (
-                    <div key={t.id} className={`${bgColors[t.type]} rounded shadow-md p-4 flex items-center gap-3 min-w-[300px] animate-slide-in`}>
+                    <div key={t.id} className={`${bgColors[t.type]} rounded shadow-md p-4 flex items-center gap-3 min-w-[300px] animate-slide-in backdrop-blur-md`}>
                         {icons[t.type]}
-                        <span className="text-sm font-medium text-gray-800">{t.message}</span>
+                        <span className="text-sm font-medium text-gray-200">{t.message}</span>
                         {t.actionText && t.onAction && (
                             <button
                                 className="ml-auto text-xs font-semibold text-blue-600 hover:text-blue-700"

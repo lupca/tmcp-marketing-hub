@@ -127,26 +127,26 @@ export default function DashboardPage() {
 
     if (!currentWorkspace) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-center text-gray-500">
-                <LayoutIcon size={48} className="mb-4 text-gray-300" />
-                <h3 className="text-lg font-medium text-gray-900">No Workspace Selected</h3>
+            <div className="flex flex-col items-center justify-center p-12 text-center text-gray-400">
+                <LayoutIcon size={48} className="mb-4 text-gray-500" />
+                <h3 className="text-lg font-medium text-gray-200">No Workspace Selected</h3>
                 <p>Please select a workspace from the sidebar to view the dashboard.</p>
             </div>
         );
     }
 
-    if (loading) return <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
+    if (loading) return <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div></div>;
 
     if (error) {
         return (
-            <div className="rounded-md bg-red-50 p-4 m-4">
+            <div className="rounded-md bg-red-900/40 border border-red-500/30 p-4 m-4 backdrop-blur-sm">
                 <div className="flex">
                     <div className="flex-shrink-0">
                         <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
                     </div>
                     <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-800">Error Loading Dashboard</h3>
-                        <div className="mt-2 text-sm text-red-700">
+                        <h3 className="text-sm font-medium text-red-200">Error Loading Dashboard</h3>
+                        <div className="mt-2 text-sm text-red-300">
                             <p>{error}</p>
                         </div>
                     </div>
@@ -194,18 +194,18 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-white text-glow">Dashboard</h1>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {statCards.map(s => (
-                    <div key={s.label} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-center">
-                        <div className="p-3 rounded-md mr-4" style={{ background: `${s.color}20`, color: s.color }}>
-                            <s.icon size={24} />
+                    <div key={s.label} className="glass-card p-6 flex items-center rounded-xl">
+                        <div className="p-3 rounded-xl mr-4 backdrop-blur-md shadow-inner" style={{ background: `${s.color}20`, color: s.color, border: `1px solid ${s.color}40` }}>
+                            <s.icon size={26} />
                         </div>
                         <div>
-                            <div className="text-sm font-medium text-gray-500">{s.label}</div>
-                            <div className="text-2xl font-bold text-gray-900">{s.value ?? 0}</div>
+                            <div className="text-sm font-medium text-gray-400 uppercase tracking-wider">{s.label}</div>
+                            <div className="text-3xl font-bold text-white mt-1 drop-shadow-sm">{s.value ?? 0}</div>
                         </div>
                     </div>
                 ))}
@@ -213,9 +213,9 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Weekly Activity Area Chart */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <TrendingUp size={18} className="mr-2" /> Weekly Activity
+                <div className="glass-card p-6 rounded-xl">
+                    <h3 className="text-lg font-semibold text-gray-100 mb-6 flex items-center tracking-wide">
+                        <TrendingUp size={20} className="mr-2 text-blue-400" /> Weekly Activity
                     </h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
@@ -230,20 +230,23 @@ export default function DashboardPage() {
                                         <stop offset="95%" stopColor="#00cec9" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" vertical={false} />
                                 <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13 }} />
-                                <Area type="monotone" dataKey="tasks" stroke="#6c5ce7" fill="url(#colorTasks)" strokeWidth={2} />
-                                <Area type="monotone" dataKey="posts" stroke="#00cec9" fill="url(#colorPosts)" strokeWidth={2} />
+                                <Tooltip
+                                    contentStyle={{ background: 'rgba(18, 18, 32, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 13, color: '#fff', backdropFilter: 'blur(10px)' }}
+                                    itemStyle={{ color: '#e2e8f0' }}
+                                />
+                                <Area type="monotone" dataKey="tasks" stroke="#6c5ce7" fill="url(#colorTasks)" strokeWidth={3} />
+                                <Area type="monotone" dataKey="posts" stroke="#00cec9" fill="url(#colorPosts)" strokeWidth={3} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* Status Pie Chart */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Content Status Distribution</h3>
+                <div className="glass-card p-6 rounded-xl">
+                    <h3 className="text-lg font-semibold text-gray-100 mb-6 tracking-wide">Content Status Distribution</h3>
                     {taskChartData.length > 0 ? (
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
@@ -256,11 +259,14 @@ export default function DashboardPage() {
                                         outerRadius={80}
                                         paddingAngle={4}
                                         dataKey="value"
-                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                                     >
-                                        {taskChartData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                                        {taskChartData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="rgba(0,0,0,0.2)" />)}
                                     </Pie>
-                                    <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8 }} />
+                                    <Tooltip
+                                        contentStyle={{ background: 'rgba(18, 18, 32, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', backdropFilter: 'blur(10px)' }}
+                                        itemStyle={{ color: '#e2e8f0' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
@@ -268,17 +274,21 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Platform Bar Chart */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 lg:col-span-2">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Variants by Platform</h3>
+                <div className="glass-card p-6 rounded-xl lg:col-span-2">
+                    <h3 className="text-lg font-semibold text-gray-100 mb-6 tracking-wide">Variants by Platform</h3>
                     {platformData.length > 0 ? (
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={platformData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff15" />
                                     <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
                                     <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-                                    <Tooltip cursor={{ fill: '#f9fafb' }} contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8 }} />
-                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
+                                    <Tooltip
+                                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                        contentStyle={{ background: 'rgba(18, 18, 32, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#fff', backdropFilter: 'blur(10px)' }}
+                                        itemStyle={{ color: '#e2e8f0' }}
+                                    />
+                                    <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                                         {platformData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                                     </Bar>
                                 </BarChart>

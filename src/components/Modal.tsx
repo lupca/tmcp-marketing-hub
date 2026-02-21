@@ -10,11 +10,11 @@ interface ModalProps {
 
 export default function Modal({ title, onClose, children, footer }: ModalProps) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 text-left" onClick={onClose}>
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-                <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                    <button className="text-gray-400 hover:text-gray-500 transition-colors" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm text-left transition-opacity">
+            <div className="glass-panel rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh] animate-slideUp">
+                <div className="flex justify-between items-center p-5 border-b border-glass-border">
+                    <h2 className="text-lg font-semibold text-white tracking-wide">{title}</h2>
+                    <button className="text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-lg" onClick={onClose}>
                         <X size={20} />
                     </button>
                 </div>
@@ -22,7 +22,7 @@ export default function Modal({ title, onClose, children, footer }: ModalProps) 
                     {children}
                 </div>
                 {footer && (
-                    <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                    <div className="p-4 border-t border-glass-border bg-black/20 rounded-b-2xl">
                         {footer}
                     </div>
                 )}

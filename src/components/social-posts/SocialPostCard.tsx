@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Plus, Edit2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { MasterContent, PlatformVariant } from '../../models/schema';
 import { PLATFORM_COLORS, APPROVAL_BADGE, PUBLISH_STATUS_BADGE } from '../../pages/socialPosts/constants/platforms';
@@ -8,7 +8,7 @@ interface SocialPostCardProps {
   mc: MasterContent;
   mcVariants: PlatformVariant[];
   isExpanded: boolean;
-  onToggleExpand: () => void;
+  onToggleExpand: (id: string) => void;
   campaignsById: Map<string, any>;
   form: any;
 }
@@ -67,7 +67,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpan
         {mcVariants.length > 0 && (
           <button
             className="mt-3 flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
-            onClick={onToggleExpand}
+            onClick={() => onToggleExpand(mc.id)}
           >
             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             {isExpanded ? 'Hide' : 'Show'} variants ({mcVariants.length})
@@ -153,4 +153,4 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpan
   );
 };
 
-export default SocialPostCard;
+export default memo(SocialPostCard);

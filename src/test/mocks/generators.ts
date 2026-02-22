@@ -75,12 +75,11 @@ export const createMockBrandIdentity = (workspaceId: string, overrides?: Partial
         collectionId: 'pbc_brand_identities',
         collectionName: 'brand_identities',
         workspace_id: workspaceId,
-        name: pickRandom(mockData.brandNames),
-        voice_tone: 'Professional, Friendly, Innovative',
-        mission_statement: 'To revolutionize the industry with cutting-edge solutions.',
-        target_audience_summary: 'Professionals aged 25-45 in the tech sector.',
-        colors: { primary: '#007bff', secondary: '#6c757d' },
-        typography: { heading: 'Inter', body: 'Roboto' },
+        brand_name: pickRandom(mockData.brandNames),
+        voice_and_tone: 'Professional, Friendly, Innovative',
+        core_messaging: { mission_statement: 'To revolutionize the industry with cutting-edge solutions.' },
+        content_pillars: ['Innovation', 'Community', 'Growth'],
+        visual_assets: { primary_color: '#007bff', secondary_color: '#6c757d', heading_font: 'Inter', body_font: 'Roboto' },
         ...overrides
     };
 };
@@ -95,12 +94,9 @@ export const createMockCustomerPersona = (workspaceId: string, overrides?: Parti
         collectionId: 'pbc_customer_personas',
         collectionName: 'customer_personas',
         workspace_id: workspaceId,
-        name: pickRandom(mockData.personaNames),
+        persona_name: pickRandom(mockData.personaNames),
         demographics: { age: '25-34', gender: 'All', location: 'Urban Areas' },
-        psychographics: { interests: ['Tech', 'Design', 'Sustainability'] },
-        pain_points: 'Lack of time, expensive alternatives, poor support',
-        goals: 'Improve efficiency, reduce costs, scale operations',
-        buying_behavior: 'Researches thoroughly, values peer reviews',
+        psychographics: { interests: ['Tech', 'Design', 'Sustainability'], pain_points: ['Lack of time', 'expensive alternatives'] },
         ...overrides
     };
 };
@@ -115,11 +111,10 @@ export const createMockInspirationEvent = (workspaceId: string, overrides?: Part
         collectionId: 'pbc_inspiration_events',
         collectionName: 'inspiration_events',
         workspace_id: workspaceId,
-        title: pickRandom(mockData.eventTitles),
+        event_name: pickRandom(mockData.eventTitles),
         event_date: generateDate(new Date(), new Date(2025, 11, 31)),
         description: 'An upcoming event that requires marketing focus.',
-        tags: 'promotion, seasonal',
-        is_recurring: false,
+        suggested_angles: ['promotion', 'seasonal'],
         ...overrides,
     };
 };

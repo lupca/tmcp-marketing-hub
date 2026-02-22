@@ -65,7 +65,7 @@ describe('CustomerProfileAIModal', () => {
         fireEvent.click(screen.getByText('Generate'));
 
         await waitFor(() => {
-            expect(screen.getByText(/Fetching brand identity/i)).toBeInTheDocument();
+            expect(screen.getByText(/Fetching brand identity data via MCP\.\.\./i)).toBeInTheDocument();
         });
 
         await waitFor(() => {

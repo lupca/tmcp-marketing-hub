@@ -7,11 +7,11 @@ import ConfirmDialog from '../components/ConfirmDialog';
 // @ts-ignore
 import CustomerProfileAIModal from '../components/CustomerProfileAIModal';
 import { Plus, Search, Edit2, Trash2, Users, Sparkles } from 'lucide-react';
-import { CustomerPersona } from '../models/schema';
+import { CustomerPersona, BrandIdentity } from '../models/schema';
 export default function CustomerProfilesPage() {
     const { currentWorkspace } = useWorkspace();
     const [items, setItems] = useState<CustomerPersona[]>([]);
-    // const [brandIdentities, setBrandIdentities] = useState<BrandIdentity[]>([]); // Might be needed for AI context, but not for direct relation in schema
+    const [brandIdentities, setBrandIdentities] = useState<BrandIdentity[]>([]);
 
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -19,7 +19,7 @@ export default function CustomerProfilesPage() {
     const [deleteId, setDeleteId] = useState<string | null>(null);
 
     const [form, setForm] = useState({
-        name: '',
+        persona_name: '',
         demographics: '{}',
         psychographics: '{}',
         // Helpers for things that might go into JSON but aren't top-level columns in new schema
@@ -36,13 +36,14 @@ export default function CustomerProfilesPage() {
         setLoading(true);
         try {
             const filter = `workspace_id = "${currentWorkspace.id}"`;
-            // Customer Personas in new schema don't link to Worksheets directly?
-            // Checking schema... customer_personas -> workspace_id (required).
-            // No worksheet_id in customer_personas.
-            // So I will remove worksheet selection.
 
-            const res = await pb.collection('customer_personas').getList<CustomerPersona>(1, 200, { filter });
-            setItems(res.items);
+            const [personasRes, brandsRes] = await Promise.all([
+                pb.collection('customer_personas').getList<CustomerPersona>(1, 200, { filter }),
+                pb.collection('brand_identities').getFullList<BrandIdentity>({ filter }),
+            ]);
+
+            setItems(personasRes.items);
+            setBrandIdentities(brandsRes);
         } catch (e: any) {
             toast.show(e.message, 'error');
         } finally {
@@ -52,11 +53,11 @@ export default function CustomerProfilesPage() {
 
     useEffect(() => { load(); }, [currentWorkspace?.id]);
 
-    const filtered = items.filter(i => i.name?.toLowerCase().includes(search.toLowerCase()));
+    const filtered = items.filter(i => i.persona_name?.toLowerCase().includes(search.toLowerCase()));
 
     const openCreate = () => {
         setForm({
-            name: '',
+            persona_name: '',
             demographics: '{}',
             psychographics: '{}',
             goals: '[]',
@@ -70,7 +71,7 @@ export default function CustomerProfilesPage() {
         const psycho: any = item.psychographics || {};
 
         setForm({
-            name: item.name || '',
+            persona_name: item.persona_name || '',
             demographics: JSON.stringify(item.demographics || {}, null, 2),
             psychographics: JSON.stringify(item.psychographics || {}, null, 2),
             goals: JSON.stringify(psycho.goals || [], null, 2),
@@ -93,7 +94,7 @@ export default function CustomerProfilesPage() {
 
             const body = {
                 workspace_id: currentWorkspace.id,
-                name: form.name,
+                persona_name: form.persona_name,
                 demographics: parse(form.demographics),
                 psychographics: psycho
             };
@@ -167,9 +168,9 @@ export default function CustomerProfilesPage() {
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center text-white font-bold text-lg">
-                                                {item.name?.[0]?.toUpperCase() || '?'}
+                                                {item.persona_name?.[0]?.toUpperCase() || '?'}
                                             </div>
-                                            <h3 className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors line-clamp-1">{item.name}</h3>
+                                            <h3 className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors line-clamp-1">{item.persona_name}</h3>
                                         </div>
                                         <div className="flex gap-1">
                                             <button title="Edit" className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors opacity-0 group-hover:opacity-100" onClick={() => openEdit(item)}>
@@ -230,7 +231,7 @@ export default function CustomerProfilesPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Persona Name *</label>
-                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.persona_name} onChange={e => setForm({ ...form, persona_name: e.target.value })} />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -260,12 +261,12 @@ export default function CustomerProfilesPage() {
 
             {showAI && (
                 <CustomerProfileAIModal
-                    brandIdentities={[]}
+                    brandIdentities={brandIdentities}
                     onClose={() => setShowAI(false)}
                     onComplete={(data: any) => {
                         setForm(f => ({
                             ...f,
-                            name: data.personaName || data.name || f.name,
+                            persona_name: data.personaName || data.name || f.persona_name,
                             demographics: data.demographics ? JSON.stringify(data.demographics, null, 2) : f.demographics,
                             psychographics: data.psychographics ? JSON.stringify(data.psychographics, null, 2) : f.psychographics,
                             goals: data.goalsAndMotivations ? JSON.stringify(data.goalsAndMotivations, null, 2) : f.goals,

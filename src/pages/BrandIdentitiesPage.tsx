@@ -61,7 +61,7 @@ export default function BrandIdentitiesPage() {
 
     useEffect(() => { load(); }, [currentWorkspace?.id]);
 
-    const filtered = items.filter(i => (i as any).brand_name?.toLowerCase().includes(search.toLowerCase()) || i.name?.toLowerCase().includes(search.toLowerCase()));
+    const filtered = items.filter(i => i.brand_name?.toLowerCase().includes(search.toLowerCase()));
 
     const openCreate = () => {
         setForm({
@@ -85,8 +85,8 @@ export default function BrandIdentitiesPage() {
         const visuals = anyItem.visual_assets || {};
 
         setForm({
-            brand_name: anyItem.brand_name || item.name || '',
-            voice_and_tone: anyItem.voice_and_tone || item.voice_tone || '',
+            brand_name: item.brand_name || '',
+            voice_and_tone: item.voice_and_tone || '',
             core_messaging: JSON.stringify(coreMsg, null, 2),
             slogan: coreMsg.slogan || '',
             mission_statement: coreMsg.mission_statement || '',
@@ -194,7 +194,7 @@ export default function BrandIdentitiesPage() {
                             return (
                                 <div key={item.id} className="glass-card rounded-xl shadow-lg p-5 flex flex-col h-full relative group">
                                     <div className="flex justify-between items-start mb-3">
-                                        <h3 className="font-bold text-lg text-gray-100 group-hover:text-blue-400 transition-colors">{(item as any).brand_name || item.name}</h3>
+                                        <h3 className="font-bold text-lg text-gray-100 group-hover:text-blue-400 transition-colors">{item.brand_name}</h3>
                                         <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button title="Edit" className="p-1.5 text-gray-400 hover:text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors" onClick={() => openEdit(item)}>
                                                 <Edit2 size={16} />

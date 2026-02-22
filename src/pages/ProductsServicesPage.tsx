@@ -243,7 +243,7 @@ export default function ProductsServicesPage() {
                                 <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Brand *</label>
                                 <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white transition-colors [&>option]:bg-gray-800" value={form.brand_id} onChange={e => setForm({ ...form, brand_id: e.target.value })}>
                                     <option value="">Select brand...</option>
-                                    {brands.map(b => <option key={b.id} value={b.id}>{(b as any).brand_name || b.name}</option>)}
+                                    {brands.map(b => <option key={b.id} value={b.id}>{b.brand_name || b.id}</option>)}
                                 </select>
                             </div>
                         </div>

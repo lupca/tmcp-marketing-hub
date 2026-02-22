@@ -40,7 +40,7 @@ describe('BrandIdentitiesPage', () => {
 
     it('fetches and displays brands', async () => {
         const mockItems = [
-            { id: '1', brand_name: 'Acme Corp', created: '2023-01-01' }
+            { id: '1', name: 'Acme Corp', created: '2023-01-01' }
         ];
 
         pb.collection('brand_identities').getList.mockResolvedValue({ items: mockItems });

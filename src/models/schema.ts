@@ -31,44 +31,37 @@ export interface Workspace extends BaseModel {
 
 export interface MediaAsset extends BaseModel {
     workspace_id: string;
-    name: string;
     file: string; // File path
-    type: 'image' | 'video' | 'document';
-    tags?: string;
-    ai_generated_tags?: any; // JSON
-    description?: string;
+    file_type: 'image' | 'video' | 'doc';
+    aspect_ratio?: '1:1' | '16:9' | '9:16' | '4:5' | '4:3' | 'N/A';
+    tags?: any; // JSON
 }
 
 export interface BrandIdentity extends BaseModel {
     workspace_id: string;
-    name: string;
-    logo?: string; // Relation to media_assets
-    colors?: any; // JSON
-    typography?: any; // JSON
-    voice_tone?: string;
-    mission_statement?: string;
-    target_audience_summary?: string;
+    brand_name: string;
+    core_messaging?: any; // JSON
+    visual_assets?: any; // JSON
+    voice_and_tone?: string; // HTML/Editor
+    dos_and_donts?: any; // JSON
+    content_pillars?: any; // JSON
 }
 
 export interface CustomerPersona extends BaseModel {
     workspace_id: string;
-    name: string;
+    persona_name: string;
+    summary?: string;
     demographics?: any; // JSON
     psychographics?: any; // JSON
-    pain_points?: string;
-    goals?: string;
-    buying_behavior?: string;
-    avatar?: string; // Relation to media_assets
 }
 
 export interface InspirationEvent extends BaseModel {
     workspace_id: string;
-    title: string;
-    event_date: string; // Date
+    event_name: string;
+    event_date?: string; // Date
+    type?: 'holiday' | 'industry_event' | 'company_milestone' | 'trend' | 'other';
     description?: string;
-    tags?: string;
-    source_url?: string;
-    is_recurring?: boolean;
+    suggested_angles?: any; // JSON
 }
 
 export interface Worksheet extends BaseModel {
@@ -146,22 +139,16 @@ export interface SocialAccount extends BaseModel {
     workspace_id: string;
     platform: 'facebook' | 'instagram' | 'linkedin' | 'twitter' | 'tiktok' | 'youtube';
     account_name: string;
+    account_id: string;
     access_token?: string;
     refresh_token?: string;
-    token_expires_at?: string; // Date
-    platform_account_id?: string;
-    status: 'active' | 'expired' | 'disconnected';
-    metadata?: any; // JSON
+    expires_at?: string; // Date
 }
 
 export interface PromptTemplate extends BaseModel {
     workspace_id: string;
-    name: string;
-    template_content: string;
-    input_variables?: any; // JSON
-    model_config?: any; // JSON
-    category?: string;
-    is_public?: boolean;
+    agent_role: string;
+    template_text: string;
 }
 
 export interface AgentLog extends BaseModel {

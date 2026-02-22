@@ -24,7 +24,6 @@ describe('customerProfileApi.js - Customer Profile AI Client', () => {
         it('sends POST request with brandIdentityId and language', async () => {
             const events = [
                 { type: 'status', status: 'fetching_brand', agent: 'MarketResearcher' },
-                { type: 'status', status: 'fetching_worksheet', agent: 'MarketResearcher' },
                 { type: 'status', status: 'analyzing', agent: 'MarketResearcher' },
                 { type: 'chunk', content: '{"personaName":"Test"}' },
                 { type: 'done', customerProfile: { personaName: 'Test' } },
@@ -43,11 +42,11 @@ describe('customerProfileApi.js - Customer Profile AI Client', () => {
                 })
             );
 
-            expect(received.length).toBe(5);
+            expect(received.length).toBe(4);
             expect(received[0].type).toBe('status');
             expect(received[0].status).toBe('fetching_brand');
-            expect(received[4].type).toBe('done');
-            expect(received[4].customerProfile.personaName).toBe('Test');
+            expect(received[3].type).toBe('done');
+            expect(received[3].customerProfile.personaName).toBe('Test');
         });
 
         it('throws on non-ok response', async () => {

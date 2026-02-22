@@ -19,10 +19,9 @@ export default function CalendarPage() {
 
     // Form state
     const [form, setForm] = useState({
-        title: '',
+        event_name: '',
         event_date: '',
-        description: '',
-        source_url: ''
+        description: ''
     });
 
     const [editId, setEditId] = useState<string | null>(null);
@@ -75,17 +74,16 @@ export default function CalendarPage() {
     const goToday = () => setCurrentMonth(new Date());
 
     const openCreate = (date = '') => {
-        setForm({ title: '', event_date: date, description: '', source_url: '' });
+        setForm({ event_name: '', event_date: date, description: '' });
         setEditId(null);
         setModal('create');
     };
 
     const openEdit = (item: InspirationEvent) => {
         setForm({
-            title: item.title || '',
+            event_name: item.event_name || '',
             event_date: item.event_date?.split(' ')[0] || '', // Handle potential timestamp format
-            description: item.description || '',
-            source_url: item.source_url || ''
+            description: item.description || ''
         });
         setEditId(item.id);
         setModal('edit');
@@ -96,10 +94,9 @@ export default function CalendarPage() {
         try {
             const body = {
                 workspace_id: currentWorkspace.id,
-                title: form.title,
+                event_name: form.event_name,
                 event_date: form.event_date,
-                description: form.description,
-                source_url: form.source_url
+                description: form.description
             };
 
             if (modal === 'edit' && editId) {
@@ -172,9 +169,9 @@ export default function CalendarPage() {
                                             key={ev.id}
                                             className="px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded-md border border-purple-500/30 truncate cursor-pointer hover:bg-purple-500/30 shadow-sm transition-all w-full text-left"
                                             onClick={e => { e.stopPropagation(); openEdit(ev); }}
-                                            title={ev.title}
+                                            title={ev.event_name}
                                         >
-                                            {ev.title}
+                                            {ev.event_name}
                                         </div>
                                     ))}
                                 </div>
@@ -207,7 +204,7 @@ export default function CalendarPage() {
                                     <tbody className="divide-y divide-glass-border/50">
                                         {events.map(item => (
                                             <tr key={item.id} className="hover:bg-white/5 transition-colors group">
-                                                <td className="px-6 py-4 font-medium text-gray-200 group-hover:text-blue-400 transition-colors">{item.title}</td>
+                                                <td className="px-6 py-4 font-medium text-gray-200 group-hover:text-blue-400 transition-colors">{item.event_name}</td>
                                                 <td className="px-6 py-4 text-gray-400">
                                                     {item.event_date ? new Date(item.event_date).toLocaleDateString() : '—'}
                                                 </td>
@@ -248,7 +245,7 @@ export default function CalendarPage() {
                     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Event Title *</label>
-                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} autoFocus />
+                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.event_name} onChange={e => setForm({ ...form, event_name: e.target.value })} autoFocus />
                         </div>
 
                         <div>
@@ -261,13 +258,10 @@ export default function CalendarPage() {
                             <textarea className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 h-24 text-white custom-scrollbar transition-colors placeholder-gray-500" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Add details or AI content suggestions..." />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Source URL (optional)</label>
-                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.source_url} onChange={e => setForm({ ...form, source_url: e.target.value })} placeholder="https://..." />
-                        </div>
                     </div>
-                </Modal>
-            )}
+                </Modal >
+            )
+            }
 
             {deleteId && <ConfirmDialog message="Delete this event?" onConfirm={handleDelete} onCancel={() => setDeleteId(null)} />}
         </>

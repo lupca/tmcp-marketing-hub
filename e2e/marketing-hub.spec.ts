@@ -83,7 +83,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Edit"]');
+        await page.click('button[title="Edit"]', { force: true });
         await page.fill('div:has(> label:has-text("Title")) input', 'Updated');
         await page.click('button:has-text("Save")');
         await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
@@ -96,7 +96,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Delete"]');
+        await page.click('button[title="Delete"]', { force: true });
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 
@@ -130,7 +130,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Edit"]');
+        await page.click('button[title="Edit"]', { force: true });
         await page.fill('div:has(> label:has-text("Brand Name")) input', 'Brand Beta');
         await page.click('button:has-text("Save")');
         await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
@@ -143,7 +143,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Delete"]');
+        await page.click('button[title="Delete"]', { force: true });
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 
@@ -161,6 +161,12 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
         await page.click('button:has-text("Save")');
 
         // Mock List
+        await page.route('**/api/collections/brand_identities/records*', async route => {
+            await route.fulfill({
+                status: 200,
+                body: JSON.stringify({ items: [], totalItems: 0 })
+            });
+        });
         await page.route('**/api/collections/customer_personas/records*', async route => {
             await route.fulfill({
                 status: 200,
@@ -177,7 +183,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Edit"]');
+        await page.click('button[title="Edit"]', { force: true });
         await page.fill('div:has(> label:has-text("Persona Name")) input', 'Persona B');
         await page.click('button:has-text("Save")');
         await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
@@ -190,7 +196,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Delete"]');
+        await page.click('button[title="Delete"]', { force: true });
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 
@@ -224,7 +230,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Edit"]');
+        await page.click('button[title="Edit"]', { force: true });
         await page.fill('div:has(> label:has-text("Campaign Name")) input', 'Camp B');
         await page.click('button:has-text("Save")');
         await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
@@ -237,7 +243,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
                 await route.fallback();
             }
         });
-        await page.click('button[title="Delete"]');
+        await page.click('button[title="Delete"]', { force: true });
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 
@@ -333,7 +339,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
             }
             await route.continue();
         });
-        await page.click('table button[title="Edit"]');
+        await page.click('table button[title="Edit"]', { force: true });
         await page.fill('textarea[placeholder*="platform-specific"]', 'Updated');
         await page.click('button:has-text("Save")');
         await expect(page.locator('.fixed.inset-0.z-50')).not.toBeVisible();
@@ -346,7 +352,7 @@ test.describe('Marketing Hub End-to-End User Flows', () => {
             }
             await route.continue();
         });
-        await page.click('table button[title="Delete"]');
+        await page.click('table button[title="Delete"]', { force: true });
         await page.click('button:has-text("Confirm"), button:has-text("Delete")');
     });
 

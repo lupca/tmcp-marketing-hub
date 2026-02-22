@@ -121,12 +121,12 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
             title="Generate Marketing Strategy with AI"
             onClose={handleCancel}
             footer={
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <div className="flex justify-end gap-3 pt-4 border-t border-glass-border">
                     {step === 'config' ? (
                         <>
-                            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleCancel}>Cancel</button>
+                            <button className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors" onClick={handleCancel}>Cancel</button>
                             <button
-                                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-all ${!isFormValid ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all shadow-lg ${!isFormValid ? 'bg-indigo-500/50 cursor-not-allowed text-indigo-200' : 'bg-indigo-600/80 hover:bg-indigo-500'}`}
                                 onClick={handleGenerate}
                                 disabled={!isFormValid}
                             >
@@ -135,61 +135,61 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
                         </>
                     ) : step === 'done' ? (
                         <>
-                            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleCancel}>Cancel</button>
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" onClick={handleUseData}>
+                            <button className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors" onClick={handleCancel}>Cancel</button>
+                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600/80 rounded-lg hover:bg-blue-500 transition-colors shadow-lg" onClick={handleUseData}>
                                 <CheckCircle2 size={14} /> Use This Data
                             </button>
                         </>
                     ) : step === 'error' ? (
-                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleCancel}>Close</button>
+                        <button className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors" onClick={handleCancel}>Close</button>
                     ) : (
-                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50" onClick={handleCancel}>Cancel</button>
+                        <button className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors" onClick={handleCancel}>Cancel</button>
                     )}
                 </div>
             }
         >
             {step === 'config' && (
                 <div className="space-y-4">
-                    <div className="bg-blue-50 text-blue-700 p-3 rounded-md text-sm">
+                    <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 p-3 rounded-lg text-sm tracking-wide">
                         Select the source documents to inform your strategy.
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Worksheet *</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value={worksheetId} onChange={e => setWorksheetId(e.target.value)}>
-                            <option value="">Select a worksheet...</option>
+                        <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Worksheet *</label>
+                        <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={worksheetId} onChange={e => setWorksheetId(e.target.value)}>
+                            <option value="" className="bg-gray-900">Select a worksheet...</option>
                             {worksheets.map(w => (
-                                <option key={w.id} value={w.id}>{w.title}</option>
+                                <option key={w.id} value={w.id} className="bg-gray-900">{w.title}</option>
                             ))}
                         </select>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Brand Identity *</label>
-                            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value={brandId} onChange={e => setBrandId(e.target.value)}>
-                                <option value="">Select brand...</option>
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Brand Identity *</label>
+                            <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={brandId} onChange={e => setBrandId(e.target.value)}>
+                                <option value="" className="bg-gray-900">Select brand...</option>
                                 {brandIdentities.map(b => (
-                                    <option key={b.id} value={b.id}>{b.brand_name || b.name || b.id}</option>
+                                    <option key={b.id} value={b.id} className="bg-gray-900">{b.brand_name || b.id}</option>
                                 ))}
                             </select>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Profile (ICP) *</label>
-                            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value={icpId} onChange={e => setIcpId(e.target.value)}>
-                                <option value="">Select ICP...</option>
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Customer Profile (ICP) *</label>
+                            <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={icpId} onChange={e => setIcpId(e.target.value)}>
+                                <option value="" className="bg-gray-900">Select ICP...</option>
                                 {customerProfiles.map(p => (
-                                    <option key={p.id} value={p.id}>{p.persona_name || p.name || p.id}</option>
+                                    <option key={p.id} value={p.id} className="bg-gray-900">{p.persona_name || p.id}</option>
                                 ))}
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Specific Goal (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Specific Goal (Optional)</label>
                         <input
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-colors"
                             value={goal}
                             onChange={e => setGoal(e.target.value)}
                             placeholder="e.g., 'Focus on brand awareness', 'Target young professionals'"
@@ -198,12 +198,12 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" value={language} onChange={e => setLanguage(e.target.value)}>
-                            <option value="Vietnamese">Vietnamese</option>
-                            <option value="English">English</option>
-                            <option value="Japanese">Japanese</option>
-                            <option value="Korean">Korean</option>
+                        <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Language</label>
+                        <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={language} onChange={e => setLanguage(e.target.value)}>
+                            <option value="Vietnamese" className="bg-gray-900">Vietnamese</option>
+                            <option value="English" className="bg-gray-900">English</option>
+                            <option value="Japanese" className="bg-gray-900">Japanese</option>
+                            <option value="Korean" className="bg-gray-900">Korean</option>
                         </select>
                     </div>
                 </div>
@@ -211,13 +211,13 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
 
             {step === 'streaming' && (
                 <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-indigo-600 font-medium">
+                    <div className="flex items-center gap-2 text-indigo-400 font-medium">
                         <Loader2 size={16} className="animate-spin" />
                         <span className="text-sm">{status}</span>
                     </div>
                     {streamedText && (
-                        <div className="bg-gray-50 rounded-md p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
-                            <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono">{streamedText}</pre>
+                        <div className="bg-black/40 rounded-lg p-3 border border-glass-border max-h-[300px] overflow-y-auto custom-scrollbar">
+                            <pre className="text-xs text-gray-300 whitespace-pre-wrap font-mono">{streamedText}</pre>
                         </div>
                     )}
                 </div>
@@ -225,26 +225,26 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
 
             {step === 'done' && result && (
                 <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-green-700 font-medium">
+                    <div className="flex items-center gap-2 text-emerald-400 font-medium tracking-wide">
                         <CheckCircle2 size={16} /> <strong>Strategy generated!</strong>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-md p-4 shadow-sm">
-                        <div className="mb-3">
-                            <strong>Positioning:</strong>
-                            <p className="text-sm text-gray-600 mt-1">{result.positioning}</p>
+                    <div className="bg-black/20 border border-glass-border rounded-xl p-5 shadow-inner backdrop-blur-sm">
+                        <div className="mb-4">
+                            <strong className="text-white tracking-wide">Positioning:</strong>
+                            <p className="text-sm text-gray-400 mt-2 leading-relaxed">{result.positioning}</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {result.acquisitionStrategy && <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md border border-blue-100">Acquisition ✓</span>}
-                            {result.valueProposition && <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-md border border-purple-100">Value Prop ✓</span>}
-                            {result.toneOfVoice && <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-md border border-green-100">Tone ✓</span>}
+                            {result.acquisitionStrategy && <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-lg border border-blue-500/30 font-medium tracking-wide">Acquisition ✓</span>}
+                            {result.valueProposition && <span className="px-2.5 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-lg border border-purple-500/30 font-medium tracking-wide">Value Prop ✓</span>}
+                            {result.toneOfVoice && <span className="px-2.5 py-1 bg-green-500/20 text-green-300 text-xs rounded-lg border border-green-500/30 font-medium tracking-wide">Tone ✓</span>}
                         </div>
                     </div>
                 </div>
             )}
 
             {step === 'error' && (
-                <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md">
-                    <AlertCircle size={16} /> <span>{error}</span>
+                <div className="flex items-start gap-3 text-red-400 bg-red-500/10 p-4 rounded-xl border border-red-500/20">
+                    <AlertCircle size={18} className="mt-0.5 shrink-0" /> <span className="text-sm leading-relaxed">{error}</span>
                 </div>
             )}
         </Modal>

@@ -272,7 +272,7 @@ export default function WorksheetsPage() {
                                     }}
                                 >
                                     {brands.map(b => (
-                                        <option key={b.id} value={b.id} className="py-1 px-2 hover:bg-white/10">{b.name}</option>
+                                        <option key={b.id} value={b.id} className="py-1 px-2 hover:bg-white/10">{b.brand_name || b.id}</option>
                                     ))}
                                 </select>
                             </div>
@@ -288,7 +288,7 @@ export default function WorksheetsPage() {
                                     }}
                                 >
                                     {customers.map(c => (
-                                        <option key={c.id} value={c.id} className="py-1 px-2 hover:bg-white/10">{c.name}</option>
+                                        <option key={c.id} value={c.id} className="py-1 px-2 hover:bg-white/10">{c.persona_name || c.id}</option>
                                     ))}
                                 </select>
                             </div>

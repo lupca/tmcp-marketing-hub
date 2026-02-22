@@ -121,7 +121,7 @@ test.describe('Batch Generation Workflow', () => {
     await expect(page.locator('label:has-text("linkedin")')).toBeVisible();
 
     // Verify Generate button in modal footer
-    const modalFooter = page.locator('.bg-gray-50.rounded-b-lg');
+    const modalFooter = page.locator('.rounded-b-2xl');
     await expect(modalFooter.locator('button:has-text("Generate")')).toBeVisible();
     await expect(modalFooter.locator('button:has-text("Cancel")')).toBeVisible();
   });
@@ -164,7 +164,7 @@ test.describe('Batch Generation Workflow', () => {
     await expect(page.locator('h2:has-text("Batch Generate Posts")')).toBeVisible();
 
     // Click Cancel in footer
-    const modalFooter = page.locator('.bg-gray-50.rounded-b-lg');
+    const modalFooter = page.locator('.rounded-b-2xl');
     await modalFooter.locator('button:has-text("Cancel")').click();
 
     // Modal should be closed
@@ -176,7 +176,7 @@ test.describe('Batch Generation Workflow', () => {
     await expect(page.locator('h2:has-text("Batch Generate Posts")')).toBeVisible();
 
     // Click X button in modal header
-    const modalHeader = page.locator('.flex.justify-between.items-center.p-4');
+    const modalHeader = page.locator('.flex.justify-between.items-center.p-5');
     await modalHeader.locator('button').click();
 
     // Modal should be closed

@@ -37,10 +37,11 @@ describe('CustomerProfilesPage', () => {
 
     it('fetches and displays profiles', async () => {
         const mockItems = [
-            { id: '1', persona_name: 'Regular Joe', created: '2023-01-01' }
+            { id: '1', name: 'Regular Joe', created: '2023-01-01' }
         ];
 
         pb.collection('customer_personas').getList.mockResolvedValue({ items: mockItems });
+        pb.collection('brand_identities').getFullList.mockResolvedValue([]);
 
         render(<CustomerProfilesPage />);
 
@@ -51,6 +52,7 @@ describe('CustomerProfilesPage', () => {
 
     it('opens create modal', async () => {
         pb.collection('customer_personas').getList.mockResolvedValue({ items: [] });
+        pb.collection('brand_identities').getFullList.mockResolvedValue([]);
 
         render(<CustomerProfilesPage />);
         await waitFor(() => expect(pb.collection).toHaveBeenCalledWith('workspaces'));

@@ -38,6 +38,7 @@ describe('CampaignsPage', () => {
             {
                 id: '1',
                 name: 'Q1 Launch',
+                campaign_name: 'Q1 Launch',
                 campaign_type: 'awareness',
                 status: 'planned',
                 expand: { worksheetId: { title: 'Base Strategy' } },

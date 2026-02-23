@@ -3,7 +3,7 @@ import Modal from './Modal';
 // @ts-ignore
 import { generateMarketingStrategy } from '../lib/marketingStrategyApi';
 import { Sparkles, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Worksheet, BrandIdentity, CustomerPersona } from '../models/schema';
+import { Worksheet, ProductService } from '../models/schema';
 
 const STATUS_MESSAGES: Record<string, string> = {
     fetching_worksheet: '📋 Fetching Worksheet via MCP...',
@@ -14,19 +14,19 @@ const STATUS_MESSAGES: Record<string, string> = {
 
 interface MarketingStrategyAIModalProps {
     worksheets: Worksheet[];
-    brandIdentities: BrandIdentity[];
-    customerProfiles: CustomerPersona[];
+    products: ProductService[];
+    initialCampaignType?: string;
     onComplete: (data: any) => void;
     onClose: () => void;
 }
 
-export default function MarketingStrategyAIModal({ worksheets, brandIdentities, customerProfiles, onComplete, onClose }: MarketingStrategyAIModalProps) {
+export default function MarketingStrategyAIModal({ worksheets, products, initialCampaignType = 'awareness', onComplete, onClose }: MarketingStrategyAIModalProps) {
     const [step, setStep] = useState<'config' | 'streaming' | 'done' | 'error'>('config');
 
     // Selection State
     const [worksheetId, setWorksheetId] = useState('');
-    const [brandId, setBrandId] = useState('');
-    const [icpId, setIcpId] = useState('');
+    const [campaignType, setCampaignType] = useState(initialCampaignType);
+    const [productId, setProductId] = useState('');
     const [goal, setGoal] = useState('');
     const [language, setLanguage] = useState('Vietnamese');
 
@@ -59,8 +59,8 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
     }, [worksheets, worksheetId]);
 
     const handleGenerate = async () => {
-        if (!worksheetId || !brandId || !icpId) {
-            setError('Please select a Worksheet, Brand Identity, and Customer Profile.');
+        if (!worksheetId || !campaignType) {
+            setError('Please select a Worksheet and Campaign Type.');
             setStep('error');
             return;
         }
@@ -76,8 +76,8 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
         try {
             await generateMarketingStrategy({
                 worksheetId,
-                brandIdentityId: brandId,
-                customerProfileId: icpId,
+                campaignType,
+                productId,
                 goal,
                 language
             }, (event: any) => {
@@ -109,12 +109,12 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
     const handleUseData = () => {
         if (result) {
             // Pass both specific result and the custom goal
-            onComplete({ ...result, goal });
+            onComplete({ ...result, goal, campaign_type: campaignType });
             onClose();
         }
     };
 
-    const isFormValid = worksheetId && brandId && icpId;
+    const isFormValid = worksheetId && campaignType;
 
     return (
         <Modal
@@ -166,21 +166,22 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Brand Identity *</label>
-                            <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={brandId} onChange={e => setBrandId(e.target.value)}>
-                                <option value="" className="bg-gray-900">Select brand...</option>
-                                {brandIdentities.map(b => (
-                                    <option key={b.id} value={b.id} className="bg-gray-900">{b.brand_name || b.id}</option>
-                                ))}
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Campaign Type *</label>
+                            <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={campaignType} onChange={e => setCampaignType(e.target.value)}>
+                                <option value="awareness" className="bg-gray-900">Awareness</option>
+                                <option value="conversion" className="bg-gray-900">Conversion</option>
+                                <option value="retargeting" className="bg-gray-900">Retargeting</option>
+                                <option value="newsletter" className="bg-gray-900">Newsletter</option>
+                                <option value="social_series" className="bg-gray-900">Social Series</option>
                             </select>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Customer Profile (ICP) *</label>
-                            <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={icpId} onChange={e => setIcpId(e.target.value)}>
-                                <option value="" className="bg-gray-900">Select ICP...</option>
-                                {customerProfiles.map(p => (
-                                    <option key={p.id} value={p.id} className="bg-gray-900">{p.persona_name || p.id}</option>
+                            <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Product (Optional)</label>
+                            <select className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-colors" value={productId} onChange={e => setProductId(e.target.value)}>
+                                <option value="" className="bg-gray-900">None / General Brand</option>
+                                {products.map(p => (
+                                    <option key={p.id} value={p.id} className="bg-gray-900">{p.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -229,6 +230,11 @@ export default function MarketingStrategyAIModal({ worksheets, brandIdentities, 
                         <CheckCircle2 size={16} /> <strong>Strategy generated!</strong>
                     </div>
                     <div className="bg-black/20 border border-glass-border rounded-xl p-5 shadow-inner backdrop-blur-sm">
+                        {result.name && (
+                            <div className="mb-4">
+                                <strong className="text-white tracking-wide text-lg text-glow">{result.name}</strong>
+                            </div>
+                        )}
                         <div className="mb-4">
                             <strong className="text-white tracking-wide">Positioning:</strong>
                             <p className="text-sm text-gray-400 mt-2 leading-relaxed">{result.positioning}</p>

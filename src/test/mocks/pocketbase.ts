@@ -1,18 +1,26 @@
 import { vi } from 'vitest';
 
-// Create a stable mock object for collection operations
-const collectionOperations = {
-    getList: vi.fn().mockResolvedValue({ items: [], totalItems: 0 }),
-    getFullList: vi.fn().mockResolvedValue([]),
-    getOne: vi.fn().mockResolvedValue({}),
-    create: vi.fn().mockResolvedValue({ id: 'new-id' }),
-    update: vi.fn().mockResolvedValue({}),
-    delete: vi.fn().mockResolvedValue(true),
-    getFirstListItem: vi.fn().mockResolvedValue({}),
+let collections: Record<string, any> = {};
+
+export const clearCollections = () => {
+    collections = {};
 };
 
 export const pb = {
-    collection: vi.fn(() => collectionOperations),
+    collection: vi.fn((name: string) => {
+        if (!collections[name]) {
+            collections[name] = {
+                getList: vi.fn().mockResolvedValue({ items: [], totalItems: 0 }),
+                getFullList: vi.fn().mockResolvedValue([]),
+                getOne: vi.fn().mockResolvedValue({}),
+                create: vi.fn().mockResolvedValue({ id: 'new-id' }),
+                update: vi.fn().mockResolvedValue({}),
+                delete: vi.fn().mockResolvedValue(true),
+                getFirstListItem: vi.fn().mockResolvedValue({}),
+            };
+        }
+        return collections[name];
+    }),
     authStore: {
         isValid: true,
         model: { id: 'test-user', email: 'test@example.com' },

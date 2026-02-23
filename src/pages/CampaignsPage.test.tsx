@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '../test/utils';
 import CampaignsPage from './CampaignsPage';
-import { pb } from '../test/mocks/pocketbase';
+import pb from '../lib/pocketbase';
 
 // Mock the contexts
 vi.mock('../contexts/AuthContext', async () => {

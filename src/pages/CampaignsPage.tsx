@@ -362,13 +362,14 @@ export default function CampaignsPage() {
             {showAI && (
                 <MarketingStrategyAIModal
                     worksheets={worksheets}
-                    // Pass empty arrays for now or fetch them if needed for the modal to work fully
-                    brandIdentities={[]}
-                    customerProfiles={[]}
+                    products={products}
+                    initialCampaignType={form.campaign_type}
                     onClose={() => setShowAI(false)}
                     onComplete={(data: any) => {
                         setForm(f => ({
                             ...f,
+                            name: data.name || f.name,
+                            campaign_type: data.campaign_type || f.campaign_type,
                             goal: data.goal || f.goal,
                             acquisitionStrategy: data.acquisitionStrategy || f.acquisitionStrategy,
                             positioning: data.positioning || f.positioning,

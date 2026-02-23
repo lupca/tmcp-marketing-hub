@@ -1,10 +1,12 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
+import { clearCollections } from './mocks/pocketbase';
 
 // Runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
     cleanup();
+    clearCollections();
 });
 
 // Mock standard resize observer for charts
@@ -27,15 +29,16 @@ vi.mock('recharts', async () => {
 });
 
 // Global Mocks
-import { vi } from 'vitest';
 import { mockAuthContext, mockWorkspaceContext } from './mocks/contexts';
-import { pb } from './mocks/pocketbase';
 
 // Mock PocketBase
-vi.mock('../lib/pocketbase', () => ({
-    default: pb,
-    pb: pb
-}));
+vi.mock('../lib/pocketbase', async () => {
+    const mock = await import('./mocks/pocketbase');
+    return {
+        default: mock.pb,
+        pb: mock.pb
+    };
+});
 
 // We do NOT mock Contexts here anymore.
 // We will use real Providers in utils.tsx to get coverage.

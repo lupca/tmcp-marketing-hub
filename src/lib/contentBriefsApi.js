@@ -1,5 +1,5 @@
-// Content Briefs AI Generation API client (SSE streaming)
 import { streamSSE } from './chatApi';
+import pb from './pocketbase';
 
 const AGENTS_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
 
@@ -13,7 +13,10 @@ const AGENTS_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
 export async function generateContentBriefs(data, onEvent, signal) {
     const res = await fetch(`${AGENTS_URL}/generate-content-briefs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            ...(pb.authStore.token ? { 'Authorization': `Bearer ${pb.authStore.token}` } : {})
+        },
         body: JSON.stringify(data),
         signal,
     });

@@ -1,4 +1,5 @@
 import { streamSSE } from './chatApi';
+import pb from './pocketbase';
 
 const API_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
 
@@ -8,21 +9,24 @@ const API_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
  *
  * @param {object} params
  * @param {string} params.worksheetId
- * @param {string} params.brandIdentityId
- * @param {string} params.customerProfileId
+ * @param {string} params.campaignType
+ * @param {string} params.productId
  * @param {string} params.goal - Custom prompt/goal
  * @param {string} params.language
  * @param {function} onEvent - Callback for SSE events
  * @param {AbortSignal} [signal] - Optional abort signal
  */
-export async function generateMarketingStrategy({ worksheetId, brandIdentityId, customerProfileId, goal, language }, onEvent, signal) {
+export async function generateMarketingStrategy({ worksheetId, campaignType, productId, goal, language }, onEvent, signal) {
     const res = await fetch(`${API_URL}/generate-marketing-strategy`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${pb.authStore.token}`
+        },
         body: JSON.stringify({
             worksheetId,
-            brandIdentityId,
-            customerProfileId,
+            campaignType,
+            productId,
             goal,
             language
         }),

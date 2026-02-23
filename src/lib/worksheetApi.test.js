@@ -34,10 +34,8 @@ describe('generateWorksheet', () => {
 
         const onEvent = vi.fn();
         const data = {
-            businessDescription: 'A startup',
-            targetAudience: 'Everyone',
-            painPoints: 'None',
-            uniqueSellingProposition: 'Best',
+            brandIds: ['bid1'],
+            customerIds: ['cid1'],
             language: 'en'
         };
 

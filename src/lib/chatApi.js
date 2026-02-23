@@ -1,5 +1,6 @@
 // Chat API client for Agents SSE streaming
 const AGENTS_URL = import.meta.env.VITE_AGENTS_API_URL || '/api/agent';
+import pb from './pocketbase';
 
 /**
  * Read an SSE stream from a fetch Response and dispatch parsed events.
@@ -50,7 +51,10 @@ export async function streamSSE(response, onEvent) {
 export async function sendMessage(message, threadId, onEvent, signal) {
     const res = await fetch(`${AGENTS_URL}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${pb.authStore.token}`
+        },
         body: JSON.stringify({ message, thread_id: threadId }),
         signal,
     });

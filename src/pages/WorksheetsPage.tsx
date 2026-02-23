@@ -60,6 +60,7 @@ export default function WorksheetsPage() {
                 pb.collection('customer_personas').getFullList<CustomerPersona>({ filter })
             ]);
 
+            console.log("WorksheetsPage res.items:", res.items);
             setItems(res.items);
             setBrands(brandRes);
             setCustomers(custRes);
@@ -337,9 +338,11 @@ export default function WorksheetsPage() {
                 </Modal>
             )}
 
-            {/* AI Generation Modal - Placeholder for now until that component is refactored */}
+            {/* AI Generation Modal */}
             {aiModal && (
                 <WorksheetAIModal
+                    brandRefs={form.brandRefs}
+                    customerRefs={form.customerRefs}
                     onClose={() => setAiModal(false)}
                     onComplete={handleAIComplete}
                 />

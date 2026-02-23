@@ -33,8 +33,8 @@ describe('marketingStrategyApi.js - AI Marketing Strategy Client', () => {
             const received = [];
             const params = {
                 worksheetId: 'ws_1',
-                brandIdentityId: 'bi_1',
-                customerProfileId: 'icp_1',
+                campaignType: 'awareness',
+                productId: 'prod_1',
                 goal: 'Grow fast',
                 language: 'English'
             };

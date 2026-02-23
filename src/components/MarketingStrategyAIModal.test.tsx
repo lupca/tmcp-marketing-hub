@@ -12,8 +12,7 @@ vi.mock('../lib/marketingStrategyApi', () => ({
 
 // Mock props
 const mockWorksheets = [{ id: 'w1', title: 'Worksheet A' }];
-const mockBrands = [{ id: 'b1', brand_name: 'Brand A' }];
-const mockICPs = [{ id: 'p1', persona_name: 'Persona A' }];
+const mockProducts = [{ id: 'p1', name: 'Product A' }];
 
 describe('MarketingStrategyAIModal', () => {
     let onCloseMock: any;
@@ -26,16 +25,19 @@ describe('MarketingStrategyAIModal', () => {
     });
 
     it('renders config form initially', () => {
-        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} brandIdentities={mockBrands as any} customerProfiles={mockICPs as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
+        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} products={mockProducts as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
         expect(screen.getByText('Generate Marketing Strategy with AI')).toBeInTheDocument();
         const generateBtn = screen.getByText('Generate').closest('button');
-        expect(generateBtn).toBeDisabled();
+        // Initial state has worksheet and campaign Type set by default
+        expect(generateBtn).not.toBeDisabled();
     });
 
     it('enables generate button when all fields selected', async () => {
-        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} brandIdentities={mockBrands as any} customerProfiles={mockICPs as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
+        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} products={mockProducts as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
         const selects = screen.getAllByRole('combobox');
-        fireEvent.change(selects[1], { target: { value: 'b1' } });
+
+        // Campaign Type is select[1], Product is select[2]
+        fireEvent.change(selects[1], { target: { value: 'conversion' } });
         fireEvent.change(selects[2], { target: { value: 'p1' } });
 
         await waitFor(() => {
@@ -45,10 +47,10 @@ describe('MarketingStrategyAIModal', () => {
     });
 
     it('calls API and streams content on generate', async () => {
-        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} brandIdentities={mockBrands as any} customerProfiles={mockICPs as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
+        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} products={mockProducts as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
 
         const selects = screen.getAllByRole('combobox');
-        fireEvent.change(selects[1], { target: { value: 'b1' } });
+        fireEvent.change(selects[1], { target: { value: 'conversion' } });
         fireEvent.change(selects[2], { target: { value: 'p1' } });
 
         let resolveMock: any;
@@ -87,9 +89,9 @@ describe('MarketingStrategyAIModal', () => {
     });
 
     it('displays error message on failure', async () => {
-        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} brandIdentities={mockBrands as any} customerProfiles={mockICPs as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
+        render(<MarketingStrategyAIModal worksheets={mockWorksheets as any} products={mockProducts as any} onComplete={onCompleteMock} onClose={onCloseMock} />);
         const selects = screen.getAllByRole('combobox');
-        fireEvent.change(selects[1], { target: { value: 'b1' } });
+        fireEvent.change(selects[1], { target: { value: 'conversion' } });
         fireEvent.change(selects[2], { target: { value: 'p1' } });
 
         let resolveMock: any;

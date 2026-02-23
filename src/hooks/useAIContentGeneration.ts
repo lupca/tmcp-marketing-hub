@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-
-// Note: handleSSEEvent is kept in code structure but main streaming is handled through fetch API
+import pb from '../lib/pocketbase';// Note: handleSSEEvent is kept in code structure but main streaming is handled through fetch API
 
 export interface ActivityLogEvent {
   type: 'status' | 'chunk' | 'platform' | 'done' | 'error' | 'tool_start' | 'tool_end' | 'warn';
@@ -96,6 +95,7 @@ export const useAIContentGeneration = (): UseAIContentGenerationReturn => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pb.authStore.token}`
         },
         body: JSON.stringify(body),
         signal: abortControllerRef.current.signal,

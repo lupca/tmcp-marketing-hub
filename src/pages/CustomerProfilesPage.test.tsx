@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '../test/utils';
 import CustomerProfilesPage from './CustomerProfilesPage';
-import { pb } from '../test/mocks/pocketbase';
+import pb from '../lib/pocketbase';
 
 // Mock the contexts
 vi.mock('../contexts/AuthContext', async () => {
@@ -37,7 +37,7 @@ describe('CustomerProfilesPage', () => {
 
     it('fetches and displays profiles', async () => {
         const mockItems = [
-            { id: '1', name: 'Regular Joe', created: '2023-01-01' }
+            { id: '1', persona_name: 'Regular Joe', created: '2023-01-01' }
         ];
 
         pb.collection('customer_personas').getList.mockResolvedValue({ items: mockItems });

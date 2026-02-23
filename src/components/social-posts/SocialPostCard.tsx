@@ -8,12 +8,12 @@ interface SocialPostCardProps {
   mc: MasterContent;
   mcVariants: PlatformVariant[];
   isExpanded: boolean;
-  onToggleExpand: () => void;
+  onToggleExpand: (id: string) => void;
   campaignsById: Map<string, any>;
   form: any;
 }
 
-const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpanded, onToggleExpand, campaignsById, form }) => {
+const SocialPostCard: React.FC<SocialPostCardProps> = React.memo(({ mc, mcVariants, isExpanded, onToggleExpand, campaignsById, form }) => {
   const campaignName = mc.campaign_id ? campaignsById.get(mc.campaign_id)?.name || null : null;
   return (
     <div className="glass-card rounded-xl shadow-lg group">
@@ -67,7 +67,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpan
         {mcVariants.length > 0 && (
           <button
             className="mt-3 flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
-            onClick={onToggleExpand}
+            onClick={() => onToggleExpand(mc.id)}
           >
             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             {isExpanded ? 'Hide' : 'Show'} variants ({mcVariants.length})
@@ -151,6 +151,6 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpan
       )}
     </div>
   );
-};
+});
 
 export default SocialPostCard;

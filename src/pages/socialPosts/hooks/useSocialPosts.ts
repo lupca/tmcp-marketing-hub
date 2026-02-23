@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import pb from '../../../lib/pocketbase';
 import { MasterContent, PlatformVariant, MarketingCampaign } from '../../../models/schema';
 import { SocialPostsData } from '../types/socialPosts';
@@ -13,7 +13,7 @@ export const useSocialPosts = (workspaceId: string | undefined) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         if (!workspaceId) return;
         setLoading(true);
         setError(null);
@@ -43,11 +43,11 @@ export const useSocialPosts = (workspaceId: string | undefined) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [workspaceId]);
 
     useEffect(() => {
         load();
-    }, [workspaceId]);
+    }, [load]);
 
     return { data, loading, error, reload: load };
 };

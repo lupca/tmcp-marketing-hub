@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -16,6 +16,7 @@ import BatchGenerateModal from '../components/social-posts/BatchGenerateModal';
 import { PlatformVariant } from '../models/schema';
 
 
+const EMPTY_VARIANTS: PlatformVariant[] = [];
 
 export default function SocialPostsPage() {
     const { currentWorkspace } = useWorkspace();
@@ -30,13 +31,16 @@ export default function SocialPostsPage() {
     const { masterContents, variants, campaigns } = data;
 
     // Form state & CRUD
-    const form = useSocialPostsForm(
-        () => {
-            toast.show('Saved successfully!', 'success');
-            reload();
-        },
-        (message: string) => toast.show(message, 'error'),
-    );
+    const onSuccess = useCallback(() => {
+        toast.show('Saved successfully!', 'success');
+        reload();
+    }, [toast, reload]);
+
+    const onError = useCallback((message: string) => {
+        toast.show(message, 'error');
+    }, [toast]);
+
+    const form = useSocialPostsForm(onSuccess, onError);
 
     // Derived Data
     const variantsByMaster = useMemo(() => {
@@ -76,14 +80,14 @@ export default function SocialPostsPage() {
     }, [masterContents, search, campaignsById, sortBy, variantCountByMaster]);
 
     // Card Expand/Collapse
-    const toggleExpand = (id: string) => {
+    const toggleExpand = useCallback((id: string) => {
         setExpandedCards(prev => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id);
             else next.add(id);
             return next;
         });
-    };
+    }, []);
 
     // Render
     return (
@@ -115,9 +119,9 @@ export default function SocialPostsPage() {
                             <SocialPostCard
                                 key={mc.id}
                                 mc={mc}
-                                mcVariants={variantsByMaster.get(mc.id) || []}
+                                mcVariants={variantsByMaster.get(mc.id) || EMPTY_VARIANTS}
                                 isExpanded={expandedCards.has(mc.id)}
-                                onToggleExpand={() => toggleExpand(mc.id)}
+                                onToggleExpand={toggleExpand}
                                 campaignsById={campaignsById}
                                 form={form}
                             />

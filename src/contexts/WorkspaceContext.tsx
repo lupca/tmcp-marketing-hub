@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Workspace } from '../models/schema';
 import pb from '../lib/pocketbase';
 import { useAuth } from './AuthContext';
@@ -25,7 +25,15 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
-    const fetchWorkspaces = async () => {
+    const selectWorkspace = useCallback((workspaceId: string) => {
+        const found = workspaces.find(w => w.id === workspaceId);
+        if (found) {
+            setCurrentWorkspace(found);
+            localStorage.setItem(STORAGE_KEY, workspaceId);
+        }
+    }, [workspaces]);
+
+    const fetchWorkspaces = useCallback(async () => {
         if (!isAuthenticated || !user) {
             setWorkspaces([]);
             setCurrentWorkspace(null);
@@ -37,25 +45,26 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         try {
             // Fetch workspaces where the user is a member or owner
             // Note: The API rules should handle filtering based on user ID
-            // Fetch workspaces where the user is a member or owner
-            // Note: The API rules should handle filtering based on user ID
             const result = await pb.collection('workspaces').getList<Workspace>(1, 50);
             const records = result.items;
             setWorkspaces(records);
 
             // Attempt to restore selected workspace from local storage
             const savedWorkspaceId = localStorage.getItem(STORAGE_KEY);
+            let workspaceToSelect: Workspace | undefined;
+
             if (savedWorkspaceId) {
-                const found = records.find(w => w.id === savedWorkspaceId);
-                if (found) {
-                    setCurrentWorkspace(found);
-                } else if (records.length > 0) {
-                    // Default to first workspace if saved one not found
-                    selectWorkspace(records[0].id);
-                }
-            } else if (records.length > 0) {
-                // Default to first workspace
-                selectWorkspace(records[0].id);
+                workspaceToSelect = records.find(w => w.id === savedWorkspaceId);
+            }
+
+            if (!workspaceToSelect && records.length > 0) {
+                // Default to first workspace if saved one not found or not set
+                workspaceToSelect = records[0];
+            }
+
+            if (workspaceToSelect) {
+                setCurrentWorkspace(workspaceToSelect);
+                localStorage.setItem(STORAGE_KEY, workspaceToSelect.id);
             }
         } catch (err) {
             console.error('Failed to fetch workspaces:', err);
@@ -66,9 +75,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [isAuthenticated, user]);
 
-    const createWorkspace = async (name: string) => {
+    const createWorkspace = useCallback(async (name: string) => {
         if (!user) return;
         try {
             const record = await pb.collection('workspaces').create<Workspace>({
@@ -77,7 +86,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 members: [user.id]
             });
             setWorkspaces(prev => [record, ...prev]);
-            selectWorkspace(record.id);
+            // Directly set current workspace to handle race condition with state update
+            setCurrentWorkspace(record);
+            localStorage.setItem(STORAGE_KEY, record.id);
         } catch (err) {
             console.error('Failed to create workspace:', err);
             if (err instanceof ClientResponseError) {
@@ -85,30 +96,24 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             }
             throw err;
         }
-    };
-
-    const selectWorkspace = (workspaceId: string) => {
-        const found = workspaces.find(w => w.id === workspaceId);
-        if (found) {
-            setCurrentWorkspace(found);
-            localStorage.setItem(STORAGE_KEY, workspaceId);
-        }
-    };
+    }, [user]);
 
     useEffect(() => {
         fetchWorkspaces();
-    }, [isAuthenticated, user?.id]); // Re-fetch when user changes
+    }, [fetchWorkspaces]); // Re-fetch when fetchWorkspaces changes (due to auth change)
+
+    const value = useMemo(() => ({
+        workspaces,
+        currentWorkspace,
+        isLoading,
+        error,
+        selectWorkspace,
+        refreshWorkspaces: fetchWorkspaces,
+        createWorkspace
+    }), [workspaces, currentWorkspace, isLoading, error, selectWorkspace, fetchWorkspaces, createWorkspace]);
 
     return (
-        <WorkspaceContext.Provider value={{
-            workspaces,
-            currentWorkspace,
-            isLoading,
-            error,
-            selectWorkspace,
-            refreshWorkspaces: fetchWorkspaces,
-            createWorkspace
-        }}>
+        <WorkspaceContext.Provider value={value}>
             {children}
         </WorkspaceContext.Provider>
     );

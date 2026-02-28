@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { ToastProvider } from './components/Toast';
@@ -18,7 +18,10 @@ import ProductsServicesPage from './pages/ProductsServicesPage';
 import ContentBriefsPage from './pages/ContentBriefsPage';
 
 // Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+// ⚡ Bolt: Used Layout Route instead of wrapping individual routes.
+// This prevents the WorkspaceProvider and Layout from unmounting/remounting on every navigation,
+// preserving context state and avoiding redundant data fetching.
+const ProtectedRoute = () => {
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
@@ -29,7 +32,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <WorkspaceProvider>
-            <Layout>{children}</Layout>
+            <Layout>
+                <Outlet />
+            </Layout>
         </WorkspaceProvider>
     );
 };
@@ -41,16 +46,20 @@ export default function App() {
                 <BrowserRouter>
                     <Routes>
                         <Route path="/login" element={<LoginPage />} />
-                        <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                        <Route path="/worksheets" element={<ProtectedRoute><WorksheetsPage /></ProtectedRoute>} />
-                        <Route path="/brands" element={<ProtectedRoute><BrandIdentitiesPage /></ProtectedRoute>} />
-                        <Route path="/customers" element={<ProtectedRoute><CustomerProfilesPage /></ProtectedRoute>} />
-                        <Route path="/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
-                        <Route path="/tasks" element={<ProtectedRoute><CampaignTasksPage /></ProtectedRoute>} />
-                        <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-                        <Route path="/social-posts" element={<ProtectedRoute><SocialPostsPage /></ProtectedRoute>} />
-                        <Route path="/products" element={<ProtectedRoute><ProductsServicesPage /></ProtectedRoute>} />
-                        <Route path="/campaigns/:campaignId/briefs" element={<ProtectedRoute><ContentBriefsPage /></ProtectedRoute>} />
+
+                        <Route element={<ProtectedRoute />}>
+                            <Route path="/" element={<DashboardPage />} />
+                            <Route path="/worksheets" element={<WorksheetsPage />} />
+                            <Route path="/brands" element={<BrandIdentitiesPage />} />
+                            <Route path="/customers" element={<CustomerProfilesPage />} />
+                            <Route path="/campaigns" element={<CampaignsPage />} />
+                            <Route path="/tasks" element={<CampaignTasksPage />} />
+                            <Route path="/calendar" element={<CalendarPage />} />
+                            <Route path="/social-posts" element={<SocialPostsPage />} />
+                            <Route path="/products" element={<ProductsServicesPage />} />
+                            <Route path="/campaigns/:campaignId/briefs" element={<ContentBriefsPage />} />
+                        </Route>
+
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </BrowserRouter>

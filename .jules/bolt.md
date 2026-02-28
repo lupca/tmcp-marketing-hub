@@ -1,0 +1,3 @@
+## 2024-03-01 - React Router Context Unmounting Bottleneck
+**Learning:** Wrapping individual routes with Context Providers in React Router v6 (e.g., `<Route element={<Provider><Page/></Provider>} />`) causes the Provider to completely unmount and remount on every navigation. This destroys context state and triggers redundant data fetching (like `WorkspaceContext` reloading workspaces).
+**Action:** Always use Layout Routes (`<Route element={<Provider><Outlet/></Provider>}>`) to wrap multiple routes that share the same context or layout, preserving state and avoiding redundant re-renders across navigations.

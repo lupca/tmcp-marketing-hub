@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { CheckCircle, XCircle, Info } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'info';
@@ -47,8 +47,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         info: 'glass-panel border-l-4 border-l-blue-500 border-t-glass-border border-r-glass-border border-b-glass-border'
     };
 
+    // Optimization: Memoize the context value to prevent consumers from re-rendering
+    // when the toast list updates (which happens frequently).
+    const contextValue = useMemo(() => ({ show }), [show]);
+
     return (
-        <ToastContext.Provider value={{ show }}>
+        <ToastContext.Provider value={contextValue}>
             {children}
             <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
                 {toasts.map(t => (

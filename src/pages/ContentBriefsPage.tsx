@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -72,11 +72,16 @@ export default function ContentBriefsPage() {
 
     useEffect(() => { load(); }, [load]);
 
-    const filtered = items.filter(i =>
-        i.angle_name?.toLowerCase().includes(search.toLowerCase()) ||
-        i.funnel_stage?.toLowerCase().includes(search.toLowerCase()) ||
-        i.psychological_angle?.toLowerCase().includes(search.toLowerCase())
-    );
+    // Optimize: memoize filtered list and hoist search lowercase computation
+    const filtered = useMemo(() => {
+        if (!search.trim()) return items;
+        const query = search.toLowerCase();
+        return items.filter(i =>
+            i.angle_name?.toLowerCase().includes(query) ||
+            i.funnel_stage?.toLowerCase().includes(query) ||
+            i.psychological_angle?.toLowerCase().includes(query)
+        );
+    }, [items, search]);
 
     const groupedByStage = FUNNEL_STAGES.reduce((acc, stage) => {
         acc[stage] = filtered.filter(i => i.funnel_stage === stage);

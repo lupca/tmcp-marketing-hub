@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -73,7 +73,12 @@ export default function WorksheetsPage() {
 
     useEffect(() => { load(); }, [currentWorkspace?.id]);
 
-    const filtered = items.filter(i => i.title?.toLowerCase().includes(search.toLowerCase()));
+    // Optimize: memoize filtered list and hoist search lowercase computation
+    const filtered = useMemo(() => {
+        if (!search.trim()) return items;
+        const query = search.toLowerCase();
+        return items.filter(i => i.title?.toLowerCase().includes(query));
+    }, [items, search]);
 
     const openCreate = () => {
         setForm({ title: '', content: '', brandRefs: [], customerRefs: [] });

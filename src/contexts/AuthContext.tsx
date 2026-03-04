@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { User } from '../models/schema';
 import pb from '../lib/pocketbase';
 
@@ -31,27 +31,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    const login = (authToken: string, authModel: User) => {
+    const login = useCallback((authToken: string, authModel: User) => {
         pb.authStore.save(authToken, authModel);
         setToken(authToken);
         setUser(authModel);
-    };
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         pb.authStore.clear();
         setToken(null);
         setUser(null);
-    };
+    }, []);
+
+    const value = useMemo(() => ({
+        user,
+        token,
+        login,
+        logout,
+        isAuthenticated: !!token && !!user,
+        isLoading
+    }), [user, token, login, logout, isLoading]);
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            token,
-            login,
-            logout,
-            isAuthenticated: !!token && !!user,
-            isLoading
-        }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

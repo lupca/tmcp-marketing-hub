@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -72,16 +72,33 @@ export default function ContentBriefsPage() {
 
     useEffect(() => { load(); }, [load]);
 
-    const filtered = items.filter(i =>
-        i.angle_name?.toLowerCase().includes(search.toLowerCase()) ||
-        i.funnel_stage?.toLowerCase().includes(search.toLowerCase()) ||
-        i.psychological_angle?.toLowerCase().includes(search.toLowerCase())
-    );
+    // ⚡ Bolt: single-pass filtering and grouping to reduce O(N*M) nested iterations
+    const { filtered, groupedByStage } = useMemo(() => {
+        const query = search.toLowerCase();
 
-    const groupedByStage = FUNNEL_STAGES.reduce((acc, stage) => {
-        acc[stage] = filtered.filter(i => i.funnel_stage === stage);
-        return acc;
-    }, {} as Record<string, ContentBrief[]>);
+        const groups = FUNNEL_STAGES.reduce((acc, stage) => {
+            acc[stage] = [];
+            return acc;
+        }, {} as Record<string, ContentBrief[]>);
+
+        const filteredItems: ContentBrief[] = [];
+
+        for (const item of items) {
+            const matchesSearch = !query ||
+                item.angle_name?.toLowerCase().includes(query) ||
+                item.funnel_stage?.toLowerCase().includes(query) ||
+                item.psychological_angle?.toLowerCase().includes(query);
+
+            if (matchesSearch) {
+                filteredItems.push(item);
+                if (item.funnel_stage && groups[item.funnel_stage]) {
+                    groups[item.funnel_stage].push(item);
+                }
+            }
+        }
+
+        return { filtered: filteredItems, groupedByStage: groups };
+    }, [items, search]);
 
     const toggleStage = (stage: string) => {
         setCollapsedStages(prev => ({ ...prev, [stage]: !prev[stage] }));

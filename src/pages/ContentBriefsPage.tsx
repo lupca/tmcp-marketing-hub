@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -72,16 +72,34 @@ export default function ContentBriefsPage() {
 
     useEffect(() => { load(); }, [load]);
 
-    const filtered = items.filter(i =>
-        i.angle_name?.toLowerCase().includes(search.toLowerCase()) ||
-        i.funnel_stage?.toLowerCase().includes(search.toLowerCase()) ||
-        i.psychological_angle?.toLowerCase().includes(search.toLowerCase())
-    );
+    // ⚡ Bolt Performance Optimization: Combined O(N*M) grouping and filtering into a single O(N) pass, memoized to prevent re-calculations.
+    const { filtered, groupedByStage } = useMemo(() => {
+        const q = search.toLowerCase();
 
-    const groupedByStage = FUNNEL_STAGES.reduce((acc, stage) => {
-        acc[stage] = filtered.filter(i => i.funnel_stage === stage);
-        return acc;
-    }, {} as Record<string, ContentBrief[]>);
+        // Pre-initialize groups to maintain stage order from FUNNEL_STAGES
+        const groups = FUNNEL_STAGES.reduce((acc, stage) => {
+            acc[stage] = [];
+            return acc;
+        }, {} as Record<string, ContentBrief[]>);
+
+        const result = [];
+
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (
+                item.angle_name?.toLowerCase().includes(q) ||
+                item.funnel_stage?.toLowerCase().includes(q) ||
+                item.psychological_angle?.toLowerCase().includes(q)
+            ) {
+                result.push(item);
+                if (item.funnel_stage && groups[item.funnel_stage]) {
+                    groups[item.funnel_stage].push(item);
+                }
+            }
+        }
+
+        return { filtered: result, groupedByStage: groups };
+    }, [items, search]);
 
     const toggleStage = (stage: string) => {
         setCollapsedStages(prev => ({ ...prev, [stage]: !prev[stage] }));

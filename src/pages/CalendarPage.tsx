@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -67,7 +67,20 @@ export default function CalendarPage() {
     const remaining = 42 - cells.length;
     for (let i = 1; i <= remaining; i++) cells.push({ day: i, other: true, date: null });
 
-    const getEventsForDate = (dateStr: string) => events.filter(e => e.event_date?.startsWith(dateStr));
+    // ⚡ Bolt Performance Optimization: Replace O(N) filtering inside calendar render loop with O(1) hash map lookup, memoized.
+    const eventsByDate = useMemo(() => {
+        const map = new Map<string, any[]>();
+        for (const ev of events) {
+            if (!ev.event_date) continue;
+            const dateStr = ev.event_date.split(' ')[0]; // PocketBase stores date times like '2023-10-25 10:00:00'
+            const list = map.get(dateStr) || [];
+            list.push(ev);
+            map.set(dateStr, list);
+        }
+        return map;
+    }, [events]);
+
+    const getEventsForDate = (dateStr: string) => eventsByDate.get(dateStr) || [];
 
     const prevMonth = () => setCurrentMonth(new Date(year, month - 1));
     const nextMonth = () => setCurrentMonth(new Date(year, month + 1));

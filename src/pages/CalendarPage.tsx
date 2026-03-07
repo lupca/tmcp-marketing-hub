@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -8,6 +8,9 @@ import { Plus, ChevronLeft, ChevronRight, CalendarDays, Edit2, Trash2 } from 'lu
 import { InspirationEvent } from '../models/schema';
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Empty fallback to preserve stable references for React renders
+const EMPTY_EVENTS: InspirationEvent[] = [];
 
 export default function CalendarPage() {
     const { currentWorkspace } = useWorkspace();
@@ -67,7 +70,24 @@ export default function CalendarPage() {
     const remaining = 42 - cells.length;
     for (let i = 1; i <= remaining; i++) cells.push({ day: i, other: true, date: null });
 
-    const getEventsForDate = (dateStr: string) => events.filter(e => e.event_date?.startsWith(dateStr));
+    // ⚡ Bolt: Performance Improvement
+    // Replaced O(N) array filtering executed inside the render loop for each calendar cell
+    // with an O(1) hash map lookup generated once via useMemo.
+    // Impact: Avoids ~42xN loop iterations on every render, significantly improving calendar navigation.
+    const eventsByDate = useMemo(() => {
+        const map = new Map<string, InspirationEvent[]>();
+        for (const ev of events) {
+            if (!ev.event_date) continue;
+            // Assuming event_date starts with YYYY-MM-DD
+            const dateStr = ev.event_date.split(' ')[0] || ev.event_date.substring(0, 10);
+            const list = map.get(dateStr) || [];
+            list.push(ev);
+            map.set(dateStr, list);
+        }
+        return map;
+    }, [events]);
+
+    const getEventsForDate = (dateStr: string) => eventsByDate.get(dateStr) || EMPTY_EVENTS;
 
     const prevMonth = () => setCurrentMonth(new Date(year, month - 1));
     const nextMonth = () => setCurrentMonth(new Date(year, month + 1));

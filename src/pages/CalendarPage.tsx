@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -67,7 +67,21 @@ export default function CalendarPage() {
     const remaining = 42 - cells.length;
     for (let i = 1; i <= remaining; i++) cells.push({ day: i, other: true, date: null });
 
-    const getEventsForDate = (dateStr: string) => events.filter(e => e.event_date?.startsWith(dateStr));
+    // ⚡ Bolt Optimization: Group events by date using useMemo to avoid O(N) filtering inside the 42-cell render loop.
+    // By pre-calculating a hash map, lookups for each calendar cell become O(1) instead of O(N).
+    // Impact: Reduces operations from ~42*N to N per calendar re-render.
+    const eventsByDate = useMemo(() => {
+        const map = new Map<string, InspirationEvent[]>();
+        for (const ev of events) {
+            if (!ev.event_date) continue;
+            // Extract the 'YYYY-MM-DD' prefix
+            const dateStr = ev.event_date.split(' ')[0];
+            const list = map.get(dateStr) || [];
+            list.push(ev);
+            map.set(dateStr, list);
+        }
+        return map;
+    }, [events]);
 
     const prevMonth = () => setCurrentMonth(new Date(year, month - 1));
     const nextMonth = () => setCurrentMonth(new Date(year, month + 1));
@@ -164,7 +178,7 @@ export default function CalendarPage() {
                                     {cell.day}
                                 </div>
                                 <div className="space-y-1.5 flex flex-col items-start w-full">
-                                    {cell.date && getEventsForDate(cell.date).map(ev => (
+                                    {cell.date && (eventsByDate.get(cell.date) || []).map(ev => (
                                         <div
                                             key={ev.id}
                                             className="px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded-md border border-purple-500/30 truncate cursor-pointer hover:bg-purple-500/30 shadow-sm transition-all w-full text-left"

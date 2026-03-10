@@ -1,0 +1,3 @@
+## 2025-03-10 - Calendar Rendering Optimization
+**Learning:** Found a common performance pitfall where O(N) `.filter()` was being called inside the grid cell rendering loop for a calendar component, leading to O(N*M) performance (N = events, M = calendar days). This scales poorly if the workspace adds many events.
+**Action:** Replaced O(N) array filtering executed inside a render loop with an O(1) hash map lookup generated once via `useMemo`. We also preserved the empty state by using a file-level constant `const EMPTY_EVENTS = []` to prevent creating new references during render loop fallbacks. This avoids unneeded re-renders.

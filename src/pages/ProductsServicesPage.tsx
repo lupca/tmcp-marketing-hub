@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -55,10 +55,18 @@ export default function ProductsServicesPage() {
 
     useEffect(() => { load(); }, [currentWorkspace?.id]);
 
-    const filtered = items.filter(i =>
-        i.name?.toLowerCase().includes(search.toLowerCase()) ||
-        i.usp?.toLowerCase().includes(search.toLowerCase())
-    );
+
+    // ⚡ Bolt: Performance Optimization
+    // Memoized search filtering to prevent recalculation on every render
+    // Hoisted toLowerCase() outside the loop to avoid redundant operations on every item
+    // Expected Impact: Reduces CPU cycles during typing by executing string ops once per update instead of O(N)
+    const filtered = useMemo(() => {
+        const searchLower = search.toLowerCase();
+        return items.filter(i =>
+            i.name?.toLowerCase().includes(searchLower) ||
+            i.usp?.toLowerCase().includes(searchLower)
+        );
+    }, [items, search]);
 
     const openCreate = () => {
         setForm(emptyForm);

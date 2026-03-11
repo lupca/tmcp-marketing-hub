@@ -1,0 +1,3 @@
+## 2024-03-11 - Hoisting Transformations in Search Filters
+**Learning:** Performing operations like `search.toLowerCase()` inside a `.filter` loop executes redundantly for every single item, unnecessarily burning CPU cycles on large datasets. While using `useMemo` caches the result, hoisting the transformation OUTSIDE the callback but inside the `useMemo` guarantees it runs exactly once per memoization update.
+**Action:** Always extract invariant computations (like converting search terms to lowercase or creating regex objects) outside of the `.filter()` or `.map()` callbacks within a `useMemo` block to maximize performance in data grids and lists.

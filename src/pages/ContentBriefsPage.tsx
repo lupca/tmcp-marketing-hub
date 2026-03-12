@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -72,16 +72,37 @@ export default function ContentBriefsPage() {
 
     useEffect(() => { load(); }, [load]);
 
-    const filtered = items.filter(i =>
-        i.angle_name?.toLowerCase().includes(search.toLowerCase()) ||
-        i.funnel_stage?.toLowerCase().includes(search.toLowerCase()) ||
-        i.psychological_angle?.toLowerCase().includes(search.toLowerCase())
-    );
+    // ⚡ Bolt: Replaced O(N*M) nested filtering with a single-pass O(N) loop.
+    // This optimization simultaneously filters items by search query and groups
+    // them by funnel stage, caching the result with useMemo to prevent
+    // unnecessary re-evaluations on every render.
+    const { filtered, groupedByStage } = useMemo(() => {
+        const q = search.toLowerCase();
+        const result = {
+            filtered: [] as ContentBrief[],
+            groupedByStage: FUNNEL_STAGES.reduce((acc, stage) => {
+                acc[stage] = [];
+                return acc;
+            }, {} as Record<string, ContentBrief[]>)
+        };
 
-    const groupedByStage = FUNNEL_STAGES.reduce((acc, stage) => {
-        acc[stage] = filtered.filter(i => i.funnel_stage === stage);
-        return acc;
-    }, {} as Record<string, ContentBrief[]>);
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const match =
+                item.angle_name?.toLowerCase().includes(q) ||
+                item.funnel_stage?.toLowerCase().includes(q) ||
+                item.psychological_angle?.toLowerCase().includes(q);
+
+            if (match) {
+                result.filtered.push(item);
+                const stage = item.funnel_stage;
+                if (stage && result.groupedByStage[stage]) {
+                    result.groupedByStage[stage].push(item);
+                }
+            }
+        }
+        return result;
+    }, [items, search]);
 
     const toggleStage = (stage: string) => {
         setCollapsedStages(prev => ({ ...prev, [stage]: !prev[stage] }));

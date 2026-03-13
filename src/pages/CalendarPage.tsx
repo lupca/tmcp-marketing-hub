@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -8,6 +8,7 @@ import { Plus, ChevronLeft, ChevronRight, CalendarDays, Edit2, Trash2 } from 'lu
 import { InspirationEvent } from '../models/schema';
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const EMPTY_EVENTS: InspirationEvent[] = [];
 
 export default function CalendarPage() {
     const { currentWorkspace } = useWorkspace();
@@ -67,7 +68,19 @@ export default function CalendarPage() {
     const remaining = 42 - cells.length;
     for (let i = 1; i <= remaining; i++) cells.push({ day: i, other: true, date: null });
 
-    const getEventsForDate = (dateStr: string) => events.filter(e => e.event_date?.startsWith(dateStr));
+    // ⚡ Bolt: Replace O(N) array filtering executed inside render loop with O(1) hash map lookup
+    const eventsByDate = useMemo(() => {
+        const map: Record<string, InspirationEvent[]> = {};
+        for (const ev of events) {
+            if (!ev.event_date) continue;
+            const dateStr = ev.event_date.split(' ')[0]; // Extract YYYY-MM-DD
+            if (!map[dateStr]) map[dateStr] = [];
+            map[dateStr].push(ev);
+        }
+        return map;
+    }, [events]);
+
+    const getEventsForDate = (dateStr: string) => eventsByDate[dateStr] || EMPTY_EVENTS;
 
     const prevMonth = () => setCurrentMonth(new Date(year, month - 1));
     const nextMonth = () => setCurrentMonth(new Date(year, month + 1));

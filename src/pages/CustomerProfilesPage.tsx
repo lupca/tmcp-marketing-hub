@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import pb from '../lib/pocketbase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
@@ -53,7 +53,11 @@ export default function CustomerProfilesPage() {
 
     useEffect(() => { load(); }, [currentWorkspace?.id]);
 
-    const filtered = items.filter(i => i.persona_name?.toLowerCase().includes(search.toLowerCase()));
+    // ⚡ Bolt: Prevent O(N) filtering and string conversions on every render
+    const filtered = useMemo(() => {
+        const query = search.toLowerCase();
+        return items.filter(i => i.persona_name?.toLowerCase().includes(query));
+    }, [items, search]);
 
     const openCreate = () => {
         setForm({

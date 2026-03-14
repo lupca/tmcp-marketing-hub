@@ -35,6 +35,7 @@ export default function Layout({ children }: LayoutProps) {
         { name: 'My Brand', href: '/brands', icon: Palette },
         { name: 'Customers', href: '/customers', icon: Users },
         { name: 'Calendar', href: '/calendar', icon: CalendarIcon },
+        { name: 'Social Accounts', href: '/social-accounts', icon: Share2 },
         { name: 'Social Posts', href: '/social-posts', icon: Share2 },
         { name: 'Products', href: '/products', icon: Package },
     ];

@@ -14,6 +14,7 @@ import CampaignsPage from './pages/CampaignsPage';
 import CampaignTasksPage from './pages/CampaignTasksPage';
 import CalendarPage from './pages/CalendarPage';
 import SocialPostsPage from './pages/SocialPostsPage';
+import SocialAccountsPage from './pages/SocialAccountsPage';
 import ProductsServicesPage from './pages/ProductsServicesPage';
 import ContentBriefsPage from './pages/ContentBriefsPage';
 
@@ -48,6 +49,7 @@ export default function App() {
                         <Route path="/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
                         <Route path="/tasks" element={<ProtectedRoute><CampaignTasksPage /></ProtectedRoute>} />
                         <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+                        <Route path="/social-accounts" element={<ProtectedRoute><SocialAccountsPage /></ProtectedRoute>} />
                         <Route path="/social-posts" element={<ProtectedRoute><SocialPostsPage /></ProtectedRoute>} />
                         <Route path="/products" element={<ProtectedRoute><ProductsServicesPage /></ProtectedRoute>} />
                         <Route path="/campaigns/:campaignId/briefs" element={<ProtectedRoute><ContentBriefsPage /></ProtectedRoute>} />

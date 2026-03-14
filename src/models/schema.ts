@@ -146,11 +146,13 @@ export interface SocialAccount extends BaseModel {
     workspace_id: string;
     platform: 'facebook' | 'instagram' | 'linkedin' | 'twitter' | 'tiktok' | 'youtube';
     account_name: string;
+    account_id: string;
     access_token?: string;
     refresh_token?: string;
-    token_expires_at?: string; // Date
+    expires_at?: string; // Date
+    token_expires_at?: string; // Backward-compat alias
     platform_account_id?: string;
-    status: 'active' | 'expired' | 'disconnected';
+    status?: 'active' | 'expired' | 'disconnected';
     metadata?: any; // JSON
 }
 

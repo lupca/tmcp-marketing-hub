@@ -43,6 +43,7 @@ export default function AgentChat() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const nextMessageIdRef = useRef(1);
 
     // Health check on mount
     useEffect(() => {
@@ -68,7 +69,7 @@ export default function AgentChat() {
         setMessages(prev => [...prev, { role: 'user', content: text }]);
 
         // Prepare agent message slot
-        const agentMsgId = Date.now();
+        const agentMsgId = nextMessageIdRef.current++;
         setMessages(prev => [...prev, {
             id: agentMsgId,
             role: 'agent',

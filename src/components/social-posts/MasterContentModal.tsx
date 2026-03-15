@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../Modal';
 import ActivityLog from './ActivityLog';
 import { useAIContentGeneration } from '../../hooks/useAIContentGeneration';
+import MediaAssetSelector from '../media/MediaAssetSelector';
 
 interface MasterContentModalProps {
   form: any;
@@ -223,6 +224,15 @@ const MasterContentModal: React.FC<MasterContentModalProps> = ({ form, campaigns
                 <option value="revision_needed">Revision Needed</option>
               </select>
             </div>
+
+            <MediaAssetSelector
+              workspaceId={currentWorkspace.id}
+              selectedIds={form.mcForm.primaryMediaIds || []}
+              onChange={(ids) => form.setMcForm({ ...form.mcForm, primaryMediaIds: ids })}
+              multiple
+              label="Primary Media"
+              helperText="Attach photos/videos/documents for this master content."
+            />
           </>
         )}
       </div>

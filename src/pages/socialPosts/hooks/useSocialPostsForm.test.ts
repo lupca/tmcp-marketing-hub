@@ -44,6 +44,7 @@ describe('useSocialPostsForm - Metadata Handling', () => {
         seo_title: '',
         seo_description: '',
         seo_keywords: '',
+        platformMediaIds: [],
       })
     );
   });
@@ -72,6 +73,7 @@ describe('useSocialPostsForm - Metadata Handling', () => {
         seo_title: 'SEO Title',
         seo_description: 'SEO Description',
         seo_keywords: 'AI, ML, Marketing',
+        platformMediaIds: ['asset-1', 'asset-2'],
       });
     });
 
@@ -83,6 +85,7 @@ describe('useSocialPostsForm - Metadata Handling', () => {
       expect.objectContaining({
         workspace_id: 'workspace-123',
         master_content_id: 'master-123',
+        platformMediaIds: ['asset-1', 'asset-2'],
         metadata: expect.stringContaining('"hashtags":"#ai #ml"'),
       })
     );
@@ -127,6 +130,7 @@ describe('useSocialPostsForm - Metadata Handling', () => {
         seo_description: 'IG Desc',
         seo_keywords: ['Instagram', 'Photos'],
       }),
+      platformMediaIds: ['asset-1'],
     };
 
     act(() => {
@@ -147,6 +151,7 @@ describe('useSocialPostsForm - Metadata Handling', () => {
         seo_title: 'IG Title',
         seo_description: 'IG Desc',
         seo_keywords: 'Instagram, Photos',  // Array joined with comma
+        platformMediaIds: ['asset-1'],
       })
     );
   });
@@ -242,6 +247,36 @@ describe('useSocialPostsForm - Metadata Handling', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         platformMediaIds: [],
+      })
+    );
+  });
+
+  it('includes primaryMediaIds in master content save request', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: 'new-master' });
+    vi.mocked(pb.collection).mockReturnValue({
+      create: mockCreate,
+      update: vi.fn(),
+      delete: vi.fn(),
+    } as any);
+
+    const { result } = renderHook(() => useSocialPostsForm(mockOnSuccess, mockOnError));
+
+    act(() => {
+      result.current.openCreateMc();
+      result.current.setMcForm({
+        ...result.current.mcForm,
+        core_message: 'Hello',
+        primaryMediaIds: ['media-123'],
+      });
+    });
+
+    await act(async () => {
+      await result.current.handleSaveMc('workspace-123');
+    });
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryMediaIds: ['media-123'],
       })
     );
   });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../Modal';
 import ActivityLog from './ActivityLog';
 import { useAIContentGeneration } from '../../hooks/useAIContentGeneration';
+import MediaAssetSelector from '../media/MediaAssetSelector';
 
 interface VariantModalProps {
   form: any;
@@ -325,6 +326,15 @@ const VariantModal: React.FC<VariantModalProps> = ({ form, currentWorkspace, mas
                 </button>
               </div>
             )}
+
+            <MediaAssetSelector
+              workspaceId={currentWorkspace.id}
+              selectedIds={form.variantForm.platformMediaIds || []}
+              onChange={(ids) => form.setVariantForm({ ...form.variantForm, platformMediaIds: ids })}
+              multiple
+              label="Variant Media"
+              helperText="Attach media tailored for this platform variant."
+            />
 
             <div>
               <div className="flex items-center justify-between mb-2">

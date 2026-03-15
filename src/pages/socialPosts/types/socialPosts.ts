@@ -4,6 +4,7 @@ export interface MasterContentForm {
     core_message: string;
     campaign_id: string;
     approval_status: string;
+    primaryMediaIds: string[];
 }
 
 export interface VariantForm {
@@ -21,6 +22,7 @@ export interface VariantForm {
     seo_title?: string;
     seo_description?: string;
     seo_keywords?: string;
+    platformMediaIds: string[];
 }
 
 export interface SocialPostsData {

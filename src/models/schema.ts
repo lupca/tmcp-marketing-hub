@@ -31,12 +31,10 @@ export interface Workspace extends BaseModel {
 
 export interface MediaAsset extends BaseModel {
     workspace_id: string;
-    name: string;
     file: string; // File path
-    type: 'image' | 'video' | 'document';
-    tags?: string;
-    ai_generated_tags?: any; // JSON
-    description?: string;
+    file_type: 'image' | 'video' | 'doc';
+    aspect_ratio?: '1:1' | '16:9' | '9:16' | '4:5' | '4:3' | 'N/A';
+    tags?: any; // JSON array
 }
 
 export interface BrandIdentity extends BaseModel {

@@ -7,11 +7,14 @@ import ConfirmDialog from '../components/ConfirmDialog';
 // @ts-ignore
 import CustomerProfileAIModal from '../components/CustomerProfileAIModal';
 import { Plus, Search, Edit2, Trash2, Users, Sparkles } from 'lucide-react';
-import { CustomerPersona, BrandIdentity } from '../models/schema';
+import { CustomerPersona, BrandIdentity, MediaAsset } from '../models/schema';
+import { getMediaAssetUrl } from '../lib/mediaAssetUrl';
+import MediaAssetSelector from '../components/media/MediaAssetSelector';
 export default function CustomerProfilesPage() {
     const { currentWorkspace } = useWorkspace();
     const [items, setItems] = useState<CustomerPersona[]>([]);
     const [brandIdentities, setBrandIdentities] = useState<BrandIdentity[]>([]);
+    const [mediaAssetsById, setMediaAssetsById] = useState<Record<string, MediaAsset>>({});
 
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -24,7 +27,8 @@ export default function CustomerProfilesPage() {
         psychographics: '{}',
         // Helpers for things that might go into JSON but aren't top-level columns in new schema
         goals: '[]',
-        pain_points: '[]'
+        pain_points: '[]',
+        avatar: '',
     });
 
     const [editId, setEditId] = useState<string | null>(null);
@@ -38,12 +42,20 @@ export default function CustomerProfilesPage() {
             const filter = `workspace_id = "${currentWorkspace.id}"`;
 
             const [personasRes, brandsRes] = await Promise.all([
-                pb.collection('customer_personas').getList<CustomerPersona>(1, 200, { filter }),
+                pb.collection('customer_personas').getList<CustomerPersona>(1, 200, { filter, expand: 'avatar' }),
                 pb.collection('brand_identities').getFullList<BrandIdentity>({ filter }),
             ]);
 
             setItems(personasRes.items);
             setBrandIdentities(brandsRes);
+
+            const mediaMap: Record<string, MediaAsset> = {};
+            for (const persona of personasRes.items as Array<CustomerPersona & { expand?: { avatar?: MediaAsset } }>) {
+                if (persona.expand?.avatar?.id) {
+                    mediaMap[persona.expand.avatar.id] = persona.expand.avatar;
+                }
+            }
+            setMediaAssetsById(mediaMap);
         } catch (e: any) {
             toast.show(e.message, 'error');
         } finally {
@@ -61,7 +73,8 @@ export default function CustomerProfilesPage() {
             demographics: '{}',
             psychographics: '{}',
             goals: '[]',
-            pain_points: '[]'
+            pain_points: '[]',
+            avatar: '',
         });
         setEditId(null);
         setModal('create');
@@ -76,6 +89,7 @@ export default function CustomerProfilesPage() {
             psychographics: JSON.stringify(item.psychographics || {}, null, 2),
             goals: JSON.stringify(psycho.goals || [], null, 2),
             pain_points: JSON.stringify(psycho.pain_points || [], null, 2),
+            avatar: item.avatar || '',
         });
         setEditId(item.id);
         setModal('edit');
@@ -96,7 +110,8 @@ export default function CustomerProfilesPage() {
                 workspace_id: currentWorkspace.id,
                 persona_name: form.persona_name,
                 demographics: parse(form.demographics),
-                psychographics: psycho
+                psychographics: psycho,
+                avatar: form.avatar || null,
             };
 
             if (modal === 'edit' && editId) {
@@ -167,9 +182,17 @@ export default function CustomerProfilesPage() {
                                 <div key={item.id} className="glass-card border border-glass-border rounded-xl shadow-sm hover:shadow-lg transition-all p-5 flex flex-col h-full group">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center text-white font-bold text-lg">
-                                                {item.persona_name?.[0]?.toUpperCase() || '?'}
-                                            </div>
+                                            {item.avatar && mediaAssetsById[item.avatar] ? (
+                                                <img
+                                                    src={getMediaAssetUrl(mediaAssetsById[item.avatar])}
+                                                    alt={item.persona_name || 'avatar'}
+                                                    className="w-10 h-10 rounded-full object-cover border border-glass-border"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center text-white font-bold text-lg">
+                                                    {item.persona_name?.[0]?.toUpperCase() || '?'}
+                                                </div>
+                                            )}
                                             <h3 className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors line-clamp-1">{item.persona_name}</h3>
                                         </div>
                                         <div className="flex gap-1">
@@ -231,8 +254,19 @@ export default function CustomerProfilesPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-1 tracking-wide">Persona Name *</label>
-                            <input className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.persona_name} onChange={e => setForm({ ...form, persona_name: e.target.value })} />
+                            <input data-testid="persona-name-input" className="w-full px-3 py-2 border border-glass-border rounded-lg bg-black/20 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 transition-colors" value={form.persona_name} onChange={e => setForm({ ...form, persona_name: e.target.value })} />
                         </div>
+
+                        {currentWorkspace && (
+                            <MediaAssetSelector
+                                workspaceId={currentWorkspace.id}
+                                selectedIds={form.avatar ? [form.avatar] : []}
+                                onChange={(ids) => setForm({ ...form, avatar: ids[0] || '' })}
+                                multiple={false}
+                                label="Avatar Media"
+                                helperText="Choose one media asset as persona avatar or upload a new one."
+                            />
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                             <div>

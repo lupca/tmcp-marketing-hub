@@ -15,6 +15,7 @@ export const useSocialPostsForm = (
         core_message: '',
         campaign_id: '',
         approval_status: 'pending',
+        primaryMediaIds: [],
     });
 
     // Variant modal state
@@ -26,6 +27,7 @@ export const useSocialPostsForm = (
         adapted_copy: '',
         publish_status: 'draft',
         scheduled_at: '',
+        platformMediaIds: [],
     });
 
     // Delete confirm state
@@ -35,7 +37,7 @@ export const useSocialPostsForm = (
     // ─── MasterContent CRUD ──────────────────────────────────────────────────
 
     const openCreateMc = () => {
-        setMcForm({ core_message: '', campaign_id: '', approval_status: 'pending' });
+        setMcForm({ core_message: '', campaign_id: '', approval_status: 'pending', primaryMediaIds: [] });
         setMcEditId(null);
         setMcModal('create');
     };
@@ -45,6 +47,7 @@ export const useSocialPostsForm = (
             core_message: mc.core_message || '',
             campaign_id: mc.campaign_id || '',
             approval_status: mc.approval_status || 'pending',
+            primaryMediaIds: Array.isArray(mc.primaryMediaIds) ? mc.primaryMediaIds : [],
         });
         setMcEditId(mc.id);
         setMcModal('edit');
@@ -57,7 +60,7 @@ export const useSocialPostsForm = (
                 core_message: mcForm.core_message,
                 campaign_id: mcForm.campaign_id || null,
                 approval_status: mcForm.approval_status,
-                primaryMediaIds: [],
+                primaryMediaIds: mcForm.primaryMediaIds,
             };
 
             if (mcModal === 'edit' && mcEditId) {
@@ -101,6 +104,7 @@ export const useSocialPostsForm = (
             seo_title: '',
             seo_description: '',
             seo_keywords: '',
+            platformMediaIds: [],
         });
         setVariantParentId(masterContentId);
         setVariantEditId(null);
@@ -133,6 +137,7 @@ export const useSocialPostsForm = (
             seo_title: metadata.seo_title || '',
             seo_description: metadata.seo_description || '',
             seo_keywords: metadata.seo_keywords ? (Array.isArray(metadata.seo_keywords) ? metadata.seo_keywords.join(', ') : metadata.seo_keywords) : '',
+            platformMediaIds: Array.isArray(v.platformMediaIds) ? v.platformMediaIds : [],
         });
         setVariantEditId(v.id);
         setVariantParentId(v.master_content_id);
@@ -166,7 +171,7 @@ export const useSocialPostsForm = (
                 adapted_copy: variantForm.adapted_copy,
                 publish_status: variantForm.publish_status,
                 scheduled_at: scheduledAtISO,
-                platformMediaIds: [],
+                platformMediaIds: variantForm.platformMediaIds,
                 metadata: JSON.stringify(metadata),
             };
 

@@ -4,6 +4,7 @@ import {
     BrandIdentity,
     CustomerPersona,
     InspirationEvent,
+    MediaAsset,
 } from '../../models/schema';
 
 // Helper for generating random IDs resembling PocketBase IDs (15 chars)
@@ -142,6 +143,24 @@ export const createMockWorksheet = (
         status: pickRandom(mockData.statuses),
         agent_context: { focus: 'Copywriting', tone: 'Exciting' },
         ...overrides
+    };
+};
+
+export const createMockMediaAsset = (workspaceId: string, overrides?: Partial<MediaAsset>): MediaAsset => {
+    const id = generateId();
+    const created = generateDate();
+    return {
+        id,
+        created,
+        updated: created,
+        collectionId: 'pbc_media_assets',
+        collectionName: 'media_assets',
+        workspace_id: workspaceId,
+        file: `${id}-asset.jpg`,
+        file_type: 'image',
+        aspect_ratio: '16:9',
+        tags: ['marketing', 'campaign'],
+        ...overrides,
     };
 };
 

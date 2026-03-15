@@ -52,6 +52,7 @@ describe('CustomerProfilesPage', () => {
 
     it('opens create modal', async () => {
         pb.collection('customer_personas').getList.mockResolvedValue({ items: [] });
+        pb.collection('media_assets').getList.mockResolvedValue({ items: [], totalPages: 1 });
         pb.collection('brand_identities').getFullList.mockResolvedValue([]);
 
         render(<CustomerProfilesPage />);
@@ -61,5 +62,44 @@ describe('CustomerProfilesPage', () => {
         fireEvent.click(createBtn);
 
         expect(screen.getByText('New Customer Profile', { selector: 'h2' })).toBeInTheDocument();
+        await waitFor(() => expect(pb.collection('media_assets').getList).toHaveBeenCalled());
+    });
+
+    it('saves selected avatar media id', async () => {
+        pb.collection('customer_personas').getList.mockResolvedValue({ items: [] });
+        pb.collection('brand_identities').getFullList.mockResolvedValue([]);
+        pb.collection('media_assets').getList.mockResolvedValue({
+            items: [
+                {
+                    id: 'asset-1',
+                    file: 'avatar.png',
+                    file_type: 'image',
+                    workspace_id: 'ws-1',
+                    created: '2026-01-01T00:00:00.000Z',
+                    updated: '2026-01-01T00:00:00.000Z',
+                    collectionName: 'media_assets',
+                    collectionId: 'col-1',
+                },
+            ],
+            totalPages: 1,
+        });
+
+        render(<CustomerProfilesPage />);
+        await waitFor(() => expect(pb.collection).toHaveBeenCalledWith('workspaces'));
+
+        fireEvent.click(screen.getByText('New Persona'));
+        await screen.findByText('New Customer Profile', { selector: 'h2' });
+        fireEvent.change(screen.getByTestId('persona-name-input'), { target: { value: 'Persona A' } });
+        fireEvent.click(await screen.findByTestId('media-option-asset-1'));
+        fireEvent.click(screen.getByText('Save'));
+
+        await waitFor(() => {
+            expect(pb.collection('customer_personas').create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    persona_name: 'Persona A',
+                    avatar: 'asset-1',
+                })
+            );
+        });
     });
 });

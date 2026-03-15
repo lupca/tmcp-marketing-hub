@@ -12,7 +12,8 @@ import {
     Menu,
     X,
     ChevronDown,
-    Package
+    Package,
+    Image
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -37,6 +38,7 @@ export default function Layout({ children }: LayoutProps) {
         { name: 'Calendar', href: '/calendar', icon: CalendarIcon },
         { name: 'Social Accounts', href: '/social-accounts', icon: Share2 },
         { name: 'Social Posts', href: '/social-posts', icon: Share2 },
+        { name: 'Media Assets', href: '/media-assets', icon: Image },
         { name: 'Products', href: '/products', icon: Package },
     ];
 

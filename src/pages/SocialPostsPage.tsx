@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useToast } from '../components/Toast';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -17,7 +17,7 @@ import PushToSocialModal from '../components/social-posts/PushToSocialModal';
 import { PlatformVariant } from '../models/schema';
 import { publishFacebookVariant } from '../lib/socialPublishApi';
 
-
+const EMPTY_VARIANTS: PlatformVariant[] = [];
 
 export default function SocialPostsPage() {
     const { currentWorkspace } = useWorkspace();
@@ -80,18 +80,18 @@ export default function SocialPostsPage() {
     }, [masterContents, search, campaignsById, sortBy, variantCountByMaster]);
 
     // Card Expand/Collapse
-    const toggleExpand = (id: string) => {
+    const toggleExpand = useCallback((id: string) => {
         setExpandedCards(prev => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id);
             else next.add(id);
             return next;
         });
-    };
+    }, []);
 
-    const handleOpenPublishPreview = (variant: PlatformVariant) => {
+    const handleOpenPublishPreview = useCallback((variant: PlatformVariant) => {
         setPublishVariant(variant);
-    };
+    }, []);
 
     const handlePublish = async () => {
         if (!publishVariant || !currentWorkspace) return;
@@ -148,9 +148,9 @@ export default function SocialPostsPage() {
                             <SocialPostCard
                                 key={mc.id}
                                 mc={mc}
-                                mcVariants={variantsByMaster.get(mc.id) || []}
+                                mcVariants={variantsByMaster.get(mc.id) || EMPTY_VARIANTS}
                                 isExpanded={expandedCards.has(mc.id)}
-                                onToggleExpand={() => toggleExpand(mc.id)}
+                                onToggleExpand={toggleExpand}
                                 campaignsById={campaignsById}
                                 form={form}
                                 onPushVariant={handleOpenPublishPreview}

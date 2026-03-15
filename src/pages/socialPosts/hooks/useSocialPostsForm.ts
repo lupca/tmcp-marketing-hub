@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import pb from '../../../lib/pocketbase';
 import { MasterContent, PlatformVariant } from '../../../models/schema';
 import { MasterContentForm, VariantForm } from '../types/socialPosts';
@@ -36,13 +36,13 @@ export const useSocialPostsForm = (
 
     // ─── MasterContent CRUD ──────────────────────────────────────────────────
 
-    const openCreateMc = () => {
+    const openCreateMc = useCallback(() => {
         setMcForm({ core_message: '', campaign_id: '', approval_status: 'pending', primaryMediaIds: [] });
         setMcEditId(null);
         setMcModal('create');
-    };
+    }, []);
 
-    const openEditMc = (mc: MasterContent) => {
+    const openEditMc = useCallback((mc: MasterContent) => {
         setMcForm({
             core_message: mc.core_message || '',
             campaign_id: mc.campaign_id || '',
@@ -51,9 +51,9 @@ export const useSocialPostsForm = (
         });
         setMcEditId(mc.id);
         setMcModal('edit');
-    };
+    }, []);
 
-    const handleSaveMc = async (currentWorkspaceId: string) => {
+    const handleSaveMc = useCallback(async (currentWorkspaceId: string) => {
         try {
             const body = {
                 workspace_id: currentWorkspaceId,
@@ -73,9 +73,9 @@ export const useSocialPostsForm = (
         } catch (e: any) {
             onError(e.message || 'Save failed');
         }
-    };
+    }, [mcForm, mcModal, mcEditId, onSuccess, onError]);
 
-    const handleDeleteMc = async () => {
+    const handleDeleteMc = useCallback(async () => {
         if (!deleteMcId) return;
         try {
             await pb.collection('master_contents').delete(deleteMcId);
@@ -84,11 +84,11 @@ export const useSocialPostsForm = (
         } catch (e: any) {
             onError(e.message || 'Delete failed');
         }
-    };
+    }, [deleteMcId, onSuccess, onError]);
 
     // ─── PlatformVariant CRUD ────────────────────────────────────────────────
 
-    const openCreateVariant = (masterContentId: string, coreMessage: string) => {
+    const openCreateVariant = useCallback((masterContentId: string, coreMessage: string) => {
         setVariantForm({
             platform: 'facebook',
             adapted_copy: coreMessage,
@@ -109,9 +109,9 @@ export const useSocialPostsForm = (
         setVariantParentId(masterContentId);
         setVariantEditId(null);
         setVariantModal('create');
-    };
+    }, []);
 
-    const openEditVariant = (v: PlatformVariant) => {
+    const openEditVariant = useCallback((v: PlatformVariant) => {
         // Parse metadata if it's stored as JSON string
         let metadata: any = {};
         if (v.metadata) {
@@ -142,9 +142,9 @@ export const useSocialPostsForm = (
         setVariantEditId(v.id);
         setVariantParentId(v.master_content_id);
         setVariantModal('edit');
-    };
+    }, []);
 
-    const handleSaveVariant = async (currentWorkspaceId: string) => {
+    const handleSaveVariant = useCallback(async (currentWorkspaceId: string) => {
         if (!variantParentId) return;
         try {
             // Convert scheduled_at to ISO string if present
@@ -185,9 +185,9 @@ export const useSocialPostsForm = (
         } catch (e: any) {
             onError(e.message || 'Save failed');
         }
-    };
+    }, [variantParentId, variantForm, variantModal, variantEditId, onSuccess, onError]);
 
-    const handleDeleteVariant = async () => {
+    const handleDeleteVariant = useCallback(async () => {
         if (!deleteVariantId) return;
         try {
             await pb.collection('platform_variants').delete(deleteVariantId);
@@ -196,9 +196,9 @@ export const useSocialPostsForm = (
         } catch (e: any) {
             onError(e.message || 'Delete failed');
         }
-    };
+    }, [deleteVariantId, onSuccess, onError]);
 
-    return {
+    return useMemo(() => ({
         // MasterContent
         mcModal,
         setMcModal,
@@ -222,5 +222,9 @@ export const useSocialPostsForm = (
         deleteVariantId,
         setDeleteVariantId,
         handleDeleteVariant,
-    };
+    }), [
+        mcModal, mcForm, openCreateMc, openEditMc, handleSaveMc, deleteMcId, handleDeleteMc,
+        variantModal, variantForm, variantParentId, openCreateVariant, openEditVariant, handleSaveVariant, deleteVariantId, handleDeleteVariant,
+        mcEditId, variantEditId
+    ]);
 };

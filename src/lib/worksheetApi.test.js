@@ -44,7 +44,10 @@ describe('generateWorksheet', () => {
         // Verify fetch call
         expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('/generate-worksheet'), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: expect.objectContaining({
+                'Content-Type': 'application/json',
+                'Authorization': expect.stringContaining('Bearer'),
+            }),
             body: JSON.stringify(data),
             signal: undefined,
         });

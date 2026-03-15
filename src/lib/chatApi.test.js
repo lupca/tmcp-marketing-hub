@@ -37,8 +37,12 @@ describe('chatApi.js - Agent Chat Client', () => {
                 expect.stringContaining('/chat'),
                 expect.objectContaining({
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: expect.objectContaining({
+                        'Content-Type': 'application/json',
+                        'Authorization': expect.stringContaining('Bearer'),
+                    }),
                     body: JSON.stringify({ message: 'hello', thread_id: 'thread-1' }),
+                    signal: undefined,
                 }),
             );
 

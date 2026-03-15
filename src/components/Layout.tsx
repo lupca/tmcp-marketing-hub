@@ -13,7 +13,8 @@ import {
     X,
     ChevronDown,
     Package,
-    Image
+    Image,
+    Film
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -39,6 +40,7 @@ export default function Layout({ children }: LayoutProps) {
         { name: 'Social Accounts', href: '/social-accounts', icon: Share2 },
         { name: 'Social Posts', href: '/social-posts', icon: Share2 },
         { name: 'Media Assets', href: '/media-assets', icon: Image },
+        { name: 'Video Generator', href: '/video-generator', icon: Film },
         { name: 'Products', href: '/products', icon: Package },
     ];
 

@@ -209,6 +209,31 @@ export interface User extends BaseModel {
     role: 'admin' | 'manager' | 'member' | 'viewer';
 }
 
+export type VideoJobStatus = 'queued' | 'claimed' | 'rendering' | 'uploading' | 'done' | 'failed';
+
+export interface VideoJob extends BaseModel {
+    workspace_id: string;
+    requested_by?: string;
+    status: VideoJobStatus;
+    priority: number;
+    input_json: Record<string, unknown>;
+    input_images: string[];
+    input_music?: string;
+    input_logo?: string;
+    variant_name?: string;
+    output_video?: string;
+    thumbnail?: string;
+    progress: number;
+    progress_stage?: string;
+    attempt_count: number;
+    max_attempts: number;
+    worker_id?: string;
+    lease_until?: string;
+    error_message?: string;
+    render_duration_ms?: number;
+    idempotency_key?: string;
+}
+
 // ==========================================
 // PocketBase Schema Definition
 // ==========================================
@@ -233,4 +258,5 @@ export interface TypedPocketBase extends PocketBase {
     collection(idOrName: 'users'): RecordService<User>;
     collection(idOrName: 'products_services'): RecordService<ProductService>;
     collection(idOrName: 'content_briefs'): RecordService<ContentBrief>;
+    collection(idOrName: 'video_jobs'): RecordService<VideoJob>;
 }

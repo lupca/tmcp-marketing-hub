@@ -41,8 +41,12 @@ describe('brandIdentityApi.js - Brand Identity AI Client', () => {
                 expect.stringContaining('/generate-brand-identity'),
                 expect.objectContaining({
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: expect.objectContaining({
+                        'Content-Type': 'application/json',
+                        'Authorization': expect.stringContaining('Bearer'),
+                    }),
                     body: JSON.stringify({ worksheetId: 'ws123', language: 'English' }),
+                    signal: undefined,
                 }),
             );
 

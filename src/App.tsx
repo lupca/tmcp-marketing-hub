@@ -18,6 +18,7 @@ import SocialAccountsPage from './pages/SocialAccountsPage';
 import ProductsServicesPage from './pages/ProductsServicesPage';
 import ContentBriefsPage from './pages/ContentBriefsPage';
 import MediaAssetsPage from './pages/MediaAssetsPage';
+import VideoGeneratorPage from './pages/VideoGeneratorPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -54,6 +55,7 @@ export default function App() {
                         <Route path="/social-posts" element={<ProtectedRoute><SocialPostsPage /></ProtectedRoute>} />
                         <Route path="/media-assets" element={<ProtectedRoute><MediaAssetsPage /></ProtectedRoute>} />
                         <Route path="/products" element={<ProtectedRoute><ProductsServicesPage /></ProtectedRoute>} />
+                        <Route path="/video-generator" element={<ProtectedRoute><VideoGeneratorPage /></ProtectedRoute>} />
                         <Route path="/campaigns/:campaignId/briefs" element={<ProtectedRoute><ContentBriefsPage /></ProtectedRoute>} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

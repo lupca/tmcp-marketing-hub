@@ -35,14 +35,16 @@ describe('useAIContentGeneration - SSE Streaming', () => {
       expect.stringContaining('/generate-platform-variants/master-123'),
       expect.objectContaining({
         method: 'POST',
-        headers: {
+        headers: expect.objectContaining({
           'Content-Type': 'application/json',
-        },
+          'Authorization': expect.stringContaining('Bearer'),
+        }),
         body: JSON.stringify({
           platforms: ['facebook', 'instagram'],
           workspaceId: 'workspace-456',
           languagePreference: 'Vietnamese',
         }),
+        signal: expect.any(AbortSignal),
       })
     );
   });
@@ -117,9 +119,10 @@ describe('useAIContentGeneration - SSE Streaming', () => {
       expect.stringContaining('/batch-generate-posts'),
       expect.objectContaining({
         method: 'POST',
-        headers: {
+        headers: expect.objectContaining({
           'Content-Type': 'application/json',
-        },
+          'Authorization': expect.stringContaining('Bearer'),
+        }),
         body: JSON.stringify({
           campaignId: 'camp-123',
           workspaceId: 'workspace-456',
@@ -127,6 +130,7 @@ describe('useAIContentGeneration - SSE Streaming', () => {
           platforms: ['facebook', 'instagram'],
           numMasters: 3,
         }),
+        signal: expect.any(AbortSignal),
       })
     );
   });

@@ -13,7 +13,9 @@ import SocialPostCard from '../components/social-posts/SocialPostCard';
 import MasterContentModal from '../components/social-posts/MasterContentModal';
 import VariantModal from '../components/social-posts/VariantModal';
 import BatchGenerateModal from '../components/social-posts/BatchGenerateModal';
+import PushToSocialModal from '../components/social-posts/PushToSocialModal';
 import { PlatformVariant } from '../models/schema';
+import { publishFacebookVariant } from '../lib/socialPublishApi';
 
 
 
@@ -24,6 +26,8 @@ export default function SocialPostsPage() {
     const [sortBy, setSortBy] = useState('newest');
     const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
     const [showBatchModal, setShowBatchModal] = useState(false);
+    const [publishVariant, setPublishVariant] = useState<PlatformVariant | null>(null);
+    const [isPublishing, setIsPublishing] = useState(false);
 
     // Load data
     const { data, loading, reload } = useSocialPosts(currentWorkspace?.id);
@@ -85,6 +89,35 @@ export default function SocialPostsPage() {
         });
     };
 
+    const handleOpenPublishPreview = (variant: PlatformVariant) => {
+        setPublishVariant(variant);
+    };
+
+    const handlePublish = async () => {
+        if (!publishVariant || !currentWorkspace) return;
+
+        setIsPublishing(true);
+        try {
+            const res = await publishFacebookVariant({
+                workspace_id: currentWorkspace.id,
+                variant_id: publishVariant.id,
+            });
+
+            toast.show(
+                res.platform_post_id
+                    ? `Published to Facebook (post id: ${res.platform_post_id})`
+                    : 'Published to Facebook successfully',
+                'success',
+            );
+            setPublishVariant(null);
+            reload();
+        } catch (e: any) {
+            toast.show(e.message || 'Failed to publish variant', 'error');
+        } finally {
+            setIsPublishing(false);
+        }
+    };
+
     // Render
     return (
         <>
@@ -120,11 +153,22 @@ export default function SocialPostsPage() {
                                 onToggleExpand={() => toggleExpand(mc.id)}
                                 campaignsById={campaignsById}
                                 form={form}
+                                onPushVariant={handleOpenPublishPreview}
+                                isPublishingVariantId={isPublishing ? publishVariant?.id || null : null}
                             />
                         ))}
                     </div>
                 )}
             </div>
+
+            {publishVariant && (
+                <PushToSocialModal
+                    variant={publishVariant}
+                    isSubmitting={isPublishing}
+                    onClose={() => setPublishVariant(null)}
+                    onConfirm={handlePublish}
+                />
+            )}
 
             {/* MasterContent Modal */}
             {form.mcModal && currentWorkspace && (

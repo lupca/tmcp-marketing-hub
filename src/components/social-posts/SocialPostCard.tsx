@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Edit2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit2, Trash2, ChevronDown, ChevronUp, Send } from 'lucide-react';
 import { MasterContent, PlatformVariant } from '../../models/schema';
 import { PLATFORM_COLORS, APPROVAL_BADGE, PUBLISH_STATUS_BADGE } from '../../pages/socialPosts/constants/platforms';
 import { stripHtml, truncate } from '../../pages/socialPosts/utils/socialPostsHelpers';
@@ -11,9 +11,11 @@ interface SocialPostCardProps {
   onToggleExpand: () => void;
   campaignsById: Map<string, any>;
   form: any;
+  onPushVariant: (variant: PlatformVariant) => void;
+  isPublishingVariantId?: string | null;
 }
 
-const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpanded, onToggleExpand, campaignsById, form }) => {
+const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpanded, onToggleExpand, campaignsById, form, onPushVariant, isPublishingVariantId }) => {
   const campaignName = mc.campaign_id ? campaignsById.get(mc.campaign_id)?.name || null : null;
   return (
     <div className="glass-card rounded-xl shadow-lg group">
@@ -119,6 +121,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({ mc, mcVariants, isExpan
                   </td>
                   <td className="px-5 py-2.5 text-right">
                     <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        title={v.platform === 'facebook' ? 'Push to Facebook' : 'Chua ho tro'}
+                        className="p-1.5 text-gray-400 hover:text-green-400 hover:bg-green-500/10 rounded-md transition-colors disabled:opacity-40 disabled:hover:text-gray-400 disabled:hover:bg-transparent"
+                        onClick={() => onPushVariant(v)}
+                        disabled={v.platform !== 'facebook' || isPublishingVariantId === v.id}
+                      >
+                        <Send size={14} />
+                      </button>
                       <button
                         title="Edit"
                         className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
